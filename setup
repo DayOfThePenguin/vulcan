@@ -1,4 +1,0 @@
-# bash version; use setup.csh if you're in c shell
-# Environment variables that need to be set before running the app
-export FLASK_APP=rethink.py
-source env/bin/activate # this assumes you've set up your virtual environment in the 'env' directory
