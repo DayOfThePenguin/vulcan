@@ -15,8 +15,15 @@ virtualenv env
 ```
 `source env/bin/activate`
 
+### Install the Cairo 2d graphics library (if not already installed)
+igraph's native plotting depends on [pycairo](https://www.cairographics.org/pycairo/), and
+in order to install pycairo, you need to have the cairo C library installed.  See
+[Cairo's downloads page](https://www.cairographics.org/download/) for install information
+
 ### Use pip to install wikimap's dependencies
-`pip install requirements.txt`
+```shell
+pip install -r requirements.txt
+```
 
 ### Open the `3d_json_generator` notebook
 run the cells until you generate the 'hand_wrangled.json' file
