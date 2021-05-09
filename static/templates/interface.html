@@ -10,13 +10,14 @@
         <div id="3d-graph"></div>
       
         <script>
-          const distance = 3000;
+          // const distance = 3000;
           const Graph = ForceGraph3D()
             (document.getElementById('3d-graph'))
-              .jsonUrl('./static/data/hand_wrangled.json')
+              .jsonUrl("{{ url_for('static', path='data/{}.json'.format(file_name)) }}")  
+            // .jsonUrl('./static/data/{{ file_name }}.json')
               .nodeLabel('id')
               .nodeAutoColorBy('group')
-              .cameraPosition({ z: distance });
+              // .cameraPosition({ z: distance });
 
               // camera orbit
               // let angle = 0;
