@@ -1,0 +1,7 @@
+This directory contains the files and scripts to build a report on the first iteration of ReThink
+
+Instructions to build:
+
+$ ./macro.sh
+
+macro.sh will run all the LaTex commands to build the paper
