@@ -1,5 +1,5 @@
 # Wikimap
-
+Visualize the connections between ideas
 ## Examples:
 [Interactive Map](https://dayofthepenguin.github.io/wikimap/interactive_demo.html)
 
