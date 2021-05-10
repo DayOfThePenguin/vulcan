@@ -1,5 +1,9 @@
 # Wikimap
 
+## Examples:
+[Interactive Map](https://dayofthepenguin.github.io/wikimap/interactive_demo.html)
+[Orbiting Map](https://dayofthepenguin.github.io/wikimap/orbiting_demo.html)
+
 ## First-time setup steps:
 
 ### Clone this repository
@@ -33,20 +37,17 @@ if you change the name of the file you generate, make sure to change the line in
 ### Open `interface.html` in a web browser
 You should see the graph displayed and be able to interact with it after the force-directed layout finishes.
 
-Below is old, TODO: refactor
+TODO: when adding functionality to work with a local wikipedia download (and adding parallel access to that...we
+stick with a single thread/process when querying the actual wikipedia site to be respectful.), add a way (tf-idf for now?)
+to calculate which pages we want to actually list as links (instead of arbitrarily picking the first x of the alphabet to make the visualizations tractable).
+Goal: to apply some statistical comparisons to pages and if the similarity of the content is above a certain threshold, display a link
+between the pages (filter all 600+ links of a page down to the smaller subset that we can actually display on screen at once)
+Alternative: modify the 3d-graph-vis library so it doesn't calculate layouts in the browser. So you can calculate it locally
+and then just plot the results in the browser. This would increase the total number of vertices you could display in the browser at
+once
 
-### Set up the environment variable that flask needs to run a testing server
-    `source setup`
+FEATURES: add a filter/legend that shows what color corresponds to which level and allow users to  so you can
 
-### Run the app on a local testing server
+TODO: refactor
 
-         flask run
 
-## Subsequent setups (if you've already done the first-time setup)
-
-### Set up the environment variable that flask needs to run a testing server
-    `source setup`
-
-### Run the app on a local testing server
-
-         flask run
