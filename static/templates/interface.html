@@ -9,36 +9,24 @@
         <div id="3d-graph"></div>
       
         <script>
-          // const stopAnimation = (Graph) => {
-          //   Graph.pauseAnimation()
-          //   console.log("Stopped animation")
-          // }
-
-          
-
-          // const distance = 3000;
+          const distance = 1800;
           const Graph = ForceGraph3D()
             (document.getElementById('3d-graph'))
               .jsonUrl("{{ url_for('static', path='data/{}.json'.format(file_name)) }}")  
-            // .jsonUrl('./static/data/{{ file_name }}.json')
               .nodeLabel('id')
               .nodeAutoColorBy('group')
-              .onNodeClick(node => window.open(`https://en.wikipedia.org/wiki/${node.id}`, '_blank'));
-            
-
-          // setTimeout(() => Graph.pauseAnimation(), 2000)
-          // setTimeout(stopAnimation(Graph), 5000)
-              // .cameraPosition({ z: distance });
+              .onNodeClick(node => window.open(`https://en.wikipedia.org/wiki/${node.id}`, '_blank'))
+              .cameraPosition({ z: distance });
 
               // camera orbit
-              // let angle = 0;
-              // setInterval(() => {
-              //   Graph.cameraPosition({
-              //     x: distance * Math.sin(angle),
-              //     z: distance * Math.cos(angle)
-              //   });
-              //   angle += Math.PI / 300;
-              // }, 10);
+              let angle = 0;
+              setInterval(() => {
+                Graph.cameraPosition({
+                  x: distance * Math.sin(angle),
+                  z: distance * Math.cos(angle)
+                });
+                angle += Math.PI / 300;
+              }, 10);
         </script>
       </body>
   </html>

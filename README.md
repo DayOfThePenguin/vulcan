@@ -5,6 +5,7 @@ Visualize the connections between ideas
 
 [Orbiting Map](https://dayofthepenguin.github.io/wikimap/orbiting_demo.html)
 
+![Sample Map](static/map.gif "Sample Wikimap")
 ## First-time setup steps:
 
 ### Clone this repository
