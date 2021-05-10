@@ -2,6 +2,7 @@
 
 ## Examples:
 [Interactive Map](https://dayofthepenguin.github.io/wikimap/interactive_demo.html)
+
 [Orbiting Map](https://dayofthepenguin.github.io/wikimap/orbiting_demo.html)
 
 ## First-time setup steps:
