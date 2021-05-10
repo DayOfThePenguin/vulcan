@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <style> body { margin: 0; } </style>
+  
+    <script src="//unpkg.com/3d-force-graph"></script>
+    <!--<script src="../../dist/3d-force-graph.js"></script>-->
+  </head>
+      
+<body>
+  <div id="3d-graph"></div>
+<script>
+    const distance = 3000;
+    const Graph = ForceGraph3D()
+      (document.getElementById('3d-graph'))
+        .jsonUrl("./data/Quantum_Mechanics_v_3323_e_5537.json")  
+        .nodeLabel('id')
+        .nodeAutoColorBy('group')
+        .onNodeClick(node => window.open(`https://en.wikipedia.org/wiki/${node.id}`, '_blank'))
+        .cameraPosition({ z: distance });
+
+        // camera orbit
+        let angle = 0;
+        setInterval(() => {
+          Graph.cameraPosition({
+            x: distance * Math.sin(angle),
+            z: distance * Math.cos(angle)
+          });
+          angle += Math.PI / 300;
+        }, 10);
+  </script>
+</body>
+  </html>

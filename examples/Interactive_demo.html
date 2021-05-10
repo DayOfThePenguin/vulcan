@@ -1,0 +1,66 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <style> body { margin: 0; } </style>
+      
+        <script src="//unpkg.com/3d-force-graph"></script><style type="text/css">.graph-info-msg {
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  color: lavender;
+  opacity: 0.7;
+  font-size: 22px;
+  position: absolute;
+  font-family: Sans-serif;
+}
+
+.grabbable {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.grabbable:active {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}</style><style type="text/css">.scene-nav-info {
+  bottom: 5px;
+  width: 100%;
+  text-align: center;
+  color: slategrey;
+  opacity: 0.7;
+  font-size: 10px;
+}
+
+.scene-tooltip {
+  color: lavender;
+  font-size: 15px;
+}
+
+.scene-nav-info, .scene-tooltip {
+  position: absolute;
+  font-family: sans-serif;
+  pointer-events: none;
+}
+
+.scene-container canvas:focus {
+  outline: none;
+}</style>
+        <!--<script src="../../dist/3d-force-graph.js"></script>-->
+      </head>
+      
+      <body>
+        <div id="3d-graph"><div style="position: relative;"><div><div class="scene-container" style="position: relative; width: 1848px; height: 950px;"><div class="scene-nav-info">Left-click: rotate, Mouse-wheel/middle-click: zoom, Right-click: pan</div><div class="scene-tooltip" style="top: 39px; left: 1439px; transform: translate(-77.868%, 21px);"></div><canvas style="display: block; width: 1848px; height: 950px;" width="1848" height="950"></canvas></div></div><div class="graph-info-msg"></div></div></div>
+      
+        <script>
+          const Graph = ForceGraph3D()
+            (document.getElementById('3d-graph'))
+              .jsonUrl("data/Quantum_Mechanics_v_3323_e_5537.json")  
+              .nodeLabel('id')
+              .nodeAutoColorBy('group')
+              .onNodeClick(node => window.open(`https://en.wikipedia.org/wiki/${node.id}`, '_blank'));
+
+        </script>
+      
+  </body></html>
