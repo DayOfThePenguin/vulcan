@@ -5,9 +5,17 @@
 {% endblock %}
 
 {% block body %}
-<form action="/" method="post">
+<!-- <form action="/" method="post">
   <label>What do you want to know about?
     <input type="text" name="idea" placeholder="I'm curious about..." />
   </label>
-</form>
+</form> -->
+<div>
+  <h3>Available Maps:</h3>
+  <ul>
+    {% for map in maps %}
+    <li><a href="maps/{{ map }}">{{ map }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
 {% endblock %}

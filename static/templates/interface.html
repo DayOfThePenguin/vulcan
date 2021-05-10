@@ -3,13 +3,19 @@
         <style> body { margin: 0; } </style>
       
         <script src="//unpkg.com/3d-force-graph"></script>
-        <!--<script src="../../dist/3d-force-graph.js"></script>-->
       </head>
       
       <body>
         <div id="3d-graph"></div>
       
         <script>
+          // const stopAnimation = (Graph) => {
+          //   Graph.pauseAnimation()
+          //   console.log("Stopped animation")
+          // }
+
+          
+
           // const distance = 3000;
           const Graph = ForceGraph3D()
             (document.getElementById('3d-graph'))
@@ -17,6 +23,11 @@
             // .jsonUrl('./static/data/{{ file_name }}.json')
               .nodeLabel('id')
               .nodeAutoColorBy('group')
+              .onNodeClick(node => window.open(`https://en.wikipedia.org/wiki/${node.id}`, '_blank'));
+            
+
+          // setTimeout(() => Graph.pauseAnimation(), 2000)
+          // setTimeout(stopAnimation(Graph), 5000)
               // .cameraPosition({ z: distance });
 
               // camera orbit
