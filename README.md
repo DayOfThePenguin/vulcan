@@ -43,6 +43,21 @@ Wikipedia's servers and don't set these to more than 3 levels and 20-30 links pe
 ```
 You should see a list of all the `.json` files in static/data. Select one to display its map. There are a few test files in there for you to experiment with.
 
+## Create your local Wikipedia Database
+Install Docker, Docker-compose
+
+run
+```shell
+docker-compose up
+```
+in this directory
+
+connect to the postgres database and create a `wikipedia` database
+```shell
+psql -h 127.0.0.1 -U postgres
+postgres=\# CREATE DATABASE wikipedia;
+```
+
 ## Future work
 TODO: when adding functionality to work with a local wikipedia download (and adding parallel access to that...we
 stick with a single thread/process when querying the actual wikipedia site to be respectful.), add a way (tf-idf for now?)
