@@ -60,10 +60,20 @@ postgres=\# CREATE DATABASE wikipedia;
 ```
 
 ## Notes
-In order to run the tests, you need to have a copy of
-`enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2` downloaded.
-You can get this from https://ftp.acc.umu.se/mirror/wikimedia.org/dumps/enwiki/
+### Running The Tests
+In order to run the tests, you need to have a single pages-articles-multistream file
+downloaded in the `/tests` directory. Any file of the format
+`r"(.+)wiki-(.+)-pages-articles-multistream(.+).xml-p(.+)p(.+).bz2"` is fine, and can
+be downloaded from https://ftp.acc.umu.se/mirror/wikimedia.org/dumps/enwiki/. To make
+the tests run faster, I recommend picking the smallest file you can find there.
 
+### Running dump-flow.py
+In order to run `dump-flow.py`, you need to download all the pages-articles-multistream
+files from https://ftp.acc.umu.se/mirror/wikimedia.org/dumps/enwiki/. The numbers at
+the end of each file `.xml-p(.+)p(.+)` indicate the page range. Set `data_path` in
+`dump-flow.py` to the location of your local copy of the database dump.
+
+### Style
 Coding Style - [black](https://black.readthedocs.io/en/stable/)
 Docstring Format - [numpydoc](https://numpydoc.readthedocs.io/en/latest/example.html#example)
 
