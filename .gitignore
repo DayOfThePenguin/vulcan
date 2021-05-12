@@ -2,3 +2,4 @@ env
 .ipynb*
 .DS_Store
 __pycache__
+*.bz2

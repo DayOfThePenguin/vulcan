@@ -18,6 +18,7 @@ in order to install pycairo, you need to have the cairo C library installed.  Se
 [Cairo's downloads page](https://www.cairographics.org/download/) for install information
 
 ### Install [Virtualenv](https://virtualenv.pypa.io/en/latest/), create a new environment, and activate it
+This module supports python 3.8+
 ```shell
 > pip install virtualenv
 > cd wikimap
@@ -57,6 +58,13 @@ connect to the postgres database and create a `wikipedia` database
 psql -h 127.0.0.1 -U postgres
 postgres=\# CREATE DATABASE wikipedia;
 ```
+
+## Common issues
+1. Q: Module imports aren't working (some form of `ModuleNotFoundError: No module named 'wikimap'`)
+
+A: The vscode workspace file in this repo implicitly sets the PYTHONPATH environment variable
+(see the `"env"` dict in `.vscode/wikimap.code-workspace`). If you're not using vscode, set the
+PYTHONPATH environment variable in your shell to the path to this repo.
 
 ## Future work
 TODO: when adding functionality to work with a local wikipedia download (and adding parallel access to that...we

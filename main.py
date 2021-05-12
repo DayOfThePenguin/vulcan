@@ -16,7 +16,6 @@ Copyright (C) 2015  Colin Dablain
     along with WikiMap in COPYING.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import urllib.parse
 import wikipedia
 
 from fastapi import FastAPI, Request
