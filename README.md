@@ -59,6 +59,14 @@ psql -h 127.0.0.1 -U postgres
 postgres=\# CREATE DATABASE wikipedia;
 ```
 
+## Notes
+In order to run the tests, you need to have a copy of
+`enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2` downloaded.
+You can get this from https://ftp.acc.umu.se/mirror/wikimedia.org/dumps/enwiki/
+
+Coding Style - [black](https://black.readthedocs.io/en/stable/)
+Docstring Format - [numpydoc](https://numpydoc.readthedocs.io/en/latest/example.html#example)
+
 ## Common issues
 1. Q: Module imports aren't working (some form of `ModuleNotFoundError: No module named 'wikimap'`)
 

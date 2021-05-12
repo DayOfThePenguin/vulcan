@@ -1,7 +1,13 @@
 """Tests for the wikitools module
 
-Current coverage:
-None
+Coverage
+--------
+WikiXMLFile
+get_next_title_element
+
+Missing
+-------
+get_headsings_sections
 """
 import bz2
 from pathlib import Path
@@ -9,11 +15,26 @@ import re
 import unittest
 from xml.etree.ElementTree import Element, iterparse
 
-from wikitools.wikixml import WikiXMLFile, get_next_article_title_and_element
+from wikitools.wikixml import WikiXMLFile, get_next_title_element
 import wikitools as wikitools
 
 
 class WikiXMLFileTest(unittest.TestCase):
+    """Test WikiXMLFile class
+
+    Tests
+    -----
+    constructor_valid_params
+        are constructor parameters set correctly?
+    constructor_invalid_params
+        will the constructor raise the correct errors for different invalid parameter
+        combinations?
+    is_real_xml_bz2
+        will the self.is_real_xml_bz2 method identify invalid .xml-p(.+)p(.+) files?
+    eq
+        does the __eq__ method work as expected?
+    """
+
     def test_constructor_valid_params(self):
         start_idx = 5
         end_idx = 8
@@ -32,12 +53,17 @@ class WikiXMLFileTest(unittest.TestCase):
         start_idx = 5
         end_idx = 8
         path = Path("no/way/do/i/exist.json")
+        # cases
         with self.assertRaisesRegex(TypeError, "invalid start_idx"):
             WikiXMLFile(invalid_start_idx, end_idx, path)
         with self.assertRaisesRegex(TypeError, "invalid end_idx"):
             WikiXMLFile(start_idx, invalid_end_idx, path)
         with self.assertRaisesRegex(TypeError, "invalid path"):
             WikiXMLFile(start_idx, end_idx, invalid_path)
+        with self.assertRaisesRegex(
+            ValueError, r"start_idx \((.+)\) must be less than end_idx \((.+)\)"
+        ):
+            WikiXMLFile(end_idx, start_idx, path)
 
     def test_is_real_xml_bz2(self):
         test_stem = "enwiki-20210420-pages-articles-multistream21"
@@ -60,16 +86,38 @@ class WikiXMLFileTest(unittest.TestCase):
                 self.assertFalse(test_file.is_real_xml_bz2())
             path.unlink()  # delete temp file
 
+    def test_eq(self):
+        start_idx = 5
+        end_idx = 8
+        path = Path("im/the/same/but/does/python/know/it.json")
+        test_self = WikiXMLFile(start_idx, end_idx, path)
+        # same parameters
+        test_other = WikiXMLFile(start_idx, end_idx, path)
+        self.assertEqual(test_self, test_other)
+        # different start_idx
+        test_other = WikiXMLFile(3, end_idx, path)
+        self.assertNotEqual(test_self, test_other)
+        # different end_idx
+        test_other = WikiXMLFile(start_idx, 15, path)
+        self.assertNotEqual(test_self, test_other)
+        # different path
+        test_other = WikiXMLFile(start_idx, end_idx, Path("not/the/same"))
+        self.assertNotEqual(test_self, test_other)
 
-class getNextArticleTitleAndElementTest(unittest.TestCase):
-    """Test wikixml.get_next_article_title_and_element
+
+class getHeadingsSections(unittest.TestCase):
+    pass
+
+
+class getNextTitleElementTest(unittest.TestCase):
+    """Test wikixml.get_next_title_element
+
     Tests
     -----
-    - params: typechecking works
-    - return_types: return types are correct
-    - returns_only_articles: only ns 0 pages are returned
-    - elem:
-
+    params : typechecking works
+    return_types : return types are correct
+    returns_only_articles : only ns 0 pages are returned
+    elem :
     """
 
     def test_params(self):
@@ -78,17 +126,17 @@ class getNextArticleTitleAndElementTest(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "parser has to be an iterator craeted by xml.etree.ElementTree"
         ):
-            get_next_article_title_and_element(invalid_parser)
+            get_next_title_element(invalid_parser)
 
     def test_return_types(self):
         """Verify that the return types are (str, xml.etree.ElementTree.Element)"""
         path = Path(
-            "enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
+            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
         )
         wiki_file = WikiXMLFile(20460153, 20570392, path)
         with bz2.open(wiki_file.path, "r") as f:
             parser = iter(iterparse(f))
-            title, elem = wikitools.wikixml.get_next_article_title_and_element(parser)
+            title, elem = wikitools.wikixml.get_next_title_element(parser)
             self.assertIsInstance(title, str)
             self.assertIsInstance(elem, Element)
 
@@ -96,7 +144,7 @@ class getNextArticleTitleAndElementTest(unittest.TestCase):
         """Verify that all page namespaces except ns 0 (Main/Article) are excluded
         from results"""
         path = Path(
-            "enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
+            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
         )
         wiki_file = WikiXMLFile(20460153, 20570392, path)
         namespaces = [  # listed at https://en.wikipedia.org/wiki/Wikipedia:Namespace
@@ -117,9 +165,7 @@ class getNextArticleTitleAndElementTest(unittest.TestCase):
             while True:
                 title, elem = None, None
                 try:
-                    title, elem = wikitools.wikixml.get_next_article_title_and_element(
-                        parser
-                    )
+                    title, elem = wikitools.wikixml.get_next_title_element(parser)
                 except StopIteration:
                     break
                 self.assertLessEqual(len(title), 200)  # titles are limited to 200 chars
@@ -132,12 +178,12 @@ class getNextArticleTitleAndElementTest(unittest.TestCase):
         coming out of the files is valid...
         """
         path = Path(
-            "enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
+            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
         )
         wiki_file = WikiXMLFile(20460153, 20570392, path)
         with bz2.open(wiki_file.path, "r") as f:
             parser = iter(iterparse(f))
-            title, elem = wikitools.wikixml.get_next_article_title_and_element(parser)
+            title, elem = wikitools.wikixml.get_next_title_element(parser)
             print(title)
             print()
             print(type(elem.text))
