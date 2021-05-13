@@ -97,3 +97,8 @@ class WikipediaPage(object):
             return False
         else:
             return True
+
+    def __repr__(self):
+        return "<Page: (\n\t title='{}',\n\t headings[:10]={},\n\t sections[0]={},\n\t links[:10]={}\n)>".format(
+            self.title, self.headings[:10], self.sections[0], self.links[:10]
+        )
