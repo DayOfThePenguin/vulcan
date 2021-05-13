@@ -8,10 +8,19 @@ processes, each running on a single thread with 5GB of memory.
 ```shell
 prefect backend server # make prefect run a local server
 prefect server start --use-volume
-prefect agent start
+prefect agent local start
 dask-scheduler
 dask-worker tcp://192.168.0.12:8786 --nprocs 6 --nthreads 1 --memory-limit=5e9
 ```
+
+For database etl
+```shell
+# need pythonpath set so dask workers can find wikimap modules
+# only necessary to set in shell that you're running dask-worker in
+export PYTHONPATH=/home/user/Developer/active/wikimap
+dask-worker tcp://192.168.0.12:8786 --nprocs 6 --nthreads 2 --memory-limit=4.5e9
+```
+
 On a 32GB machine, this leaves me with 2GB for system tasks before I start swapping. My experience is that you need about 5GB per
 worker to load the wikipeda xml files, so divide your RAM by 5 to get the correct `nprocs` (num processes) for you. `nthreads` is
 the number of threads per process, limit this to one to avoid using all your system's memory.

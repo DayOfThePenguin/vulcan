@@ -39,9 +39,6 @@ class WikiXMLFile(object):
         self.start_idx = start_idx
         self.end_idx = end_idx
         self.path = path
-        # don't always assign a parser, only if the file is real
-        if self.is_real_xml_bz2():
-            self.parser = self._parser()
 
     def __eq__(self, other):
         """Equality method
@@ -86,7 +83,7 @@ class WikiXMLFile(object):
         return True
 
     @contextmanager
-    def _parser(self):
+    def parser(self):
         """Context manager to yield a parser (iterator from
         xml.etree.ElementTree.iterparse) for the .xml.bz2 file at self.path
 
@@ -238,7 +235,7 @@ def get_pagelinks(
 
 
 def get_next_title_element(
-    parser: iterparse,
+    parser: Iterator,
 ) -> Tuple[str, Element]:
     """Get the next title and Element in namespace 0 (Main/Article) from an iterator
 
@@ -363,8 +360,7 @@ def wikifile_num_articles_longest_article(wiki_file: WikiXMLFile) -> Tuple[int, 
     max_title_len = 0
     longest_title = None
     with bz2.open(wiki_file.path, "r") as f:
-        parser = iter(iterparse(f))
-
+        parser = iterparse(f)
         while True:
             title, elem = None, None
             try:

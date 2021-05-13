@@ -6,6 +6,9 @@ from prefect import task, Flow
 from prefect.executors import DaskExecutor
 from typing import List, Tuple
 
+import bz2
+from xml.etree.ElementTree import iterparse
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -16,7 +19,7 @@ from wikitools.wikipage import WikipediaPage
 from db.models import Page, Base
 import db.crud
 
-DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/wikipedia"
+DATABASE_URI = "postgresql://postgres:postgres@localhost:8001/wikipedia"
 
 
 @task
@@ -30,7 +33,8 @@ def load_database_in_chunks(wiki_file: WikiXMLFile) -> None:
     articles = []
     chunk_size = 1000
     chunk_num = 1
-    with wiki_file.parser as parser:
+    with bz2.open(wiki_file.path, "r") as f:
+        parser = iterparse(f)
         s = Session()
         while True:
             title, element = None, None
@@ -93,18 +97,18 @@ if __name__ == "__main__":
     data_path = Path("/hdd/datasets/wikipedia_4_20_21")
     prefect.config.logging.level = "DEBUG"
 
-    with Flow("find-longest-article") as flow:
+    with Flow("wikipedia-etl") as flow:
         sorted_files = get_xml_files_from_data_path(data_path)
         check_for_complete = is_dump_contiguous(sorted_files)
         # test run
-        load_futures = load_database_in_chunks.map(sorted_files[:1])
+        # load_futures = load_database_in_chunks.map(sorted_files[:1])
         # full run
-        # longest_articles = find_longest_article_in_xml_chunk.map(sorted_files[:2])
+        load_futures = load_database_in_chunks.map(sorted_files)
         load_futures.set_dependencies(upstream_tasks=[check_for_complete])
 
     # test run
-    flow.run()
+    # flow.run()
 
     # full, prefect server, agent, dask-scheduler, dask-worker run
-    # flow.executor = DaskExecutor("tcp://192.168.0.12:8786")
-    # flow.register(project_name="wikipedia")
+    flow.executor = DaskExecutor("tcp://192.168.0.12:8786")
+    flow.register(project_name="wikipedia")
