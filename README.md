@@ -18,6 +18,7 @@ in order to install pycairo, you need to have the cairo C library installed.  Se
 [Cairo's downloads page](https://www.cairographics.org/download/) for install information
 
 ### Install [Virtualenv](https://virtualenv.pypa.io/en/latest/), create a new environment, and activate it
+This module supports python 3.8+
 ```shell
 > pip install virtualenv
 > cd wikimap
@@ -42,6 +43,46 @@ Wikipedia's servers and don't set these to more than 3 levels and 20-30 links pe
 [env] > uvicorn main:app --reload
 ```
 You should see a list of all the `.json` files in static/data. Select one to display its map. There are a few test files in there for you to experiment with.
+
+## Create your local Wikipedia Database
+Install Docker, Docker-compose
+
+run
+```shell
+docker-compose up
+```
+in this directory
+
+connect to the postgres database and create a `wikipedia` database
+```shell
+psql -h 127.0.0.1 -U postgres
+postgres=\# CREATE DATABASE wikipedia;
+```
+
+## Notes
+### Running The Tests
+In order to run the tests, you need to have a single pages-articles-multistream file
+downloaded in the `/tests` directory. Any file of the format
+`r"(.+)wiki-(.+)-pages-articles-multistream(.+).xml-p(.+)p(.+).bz2"` is fine, and can
+be downloaded from https://ftp.acc.umu.se/mirror/wikimedia.org/dumps/enwiki/. To make
+the tests run faster, I recommend picking the smallest file you can find there.
+
+### Running dump-flow.py
+In order to run `dump-flow.py`, you need to download all the pages-articles-multistream
+files from https://ftp.acc.umu.se/mirror/wikimedia.org/dumps/enwiki/. The numbers at
+the end of each file `.xml-p(.+)p(.+)` indicate the page range. Set `data_path` in
+`dump-flow.py` to the location of your local copy of the database dump.
+
+### Style
+Coding Style - [black](https://black.readthedocs.io/en/stable/)
+Docstring Format - [numpydoc](https://numpydoc.readthedocs.io/en/latest/example.html#example)
+
+## Common issues
+1. Q: Module imports aren't working (some form of `ModuleNotFoundError: No module named 'wikimap'`)
+
+A: The vscode workspace file in this repo implicitly sets the PYTHONPATH environment variable
+(see the `"env"` dict in `.vscode/wikimap.code-workspace`). If you're not using vscode, set the
+PYTHONPATH environment variable in your shell to the path to this repo.
 
 ## Future work
 TODO: when adding functionality to work with a local wikipedia download (and adding parallel access to that...we

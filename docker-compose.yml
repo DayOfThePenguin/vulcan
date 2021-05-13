@@ -1,0 +1,21 @@
+version: '3'
+
+# name for volume to store the data throughout the file.
+volumes:
+    postgres-data:
+
+services:
+  database:
+    container_name: wikipediadata
+    image: postgres
+    # Create the necessary environment variables.
+    # env_file:
+    #     - .env/development/database
+    ports:
+        - 5432:5432
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        # POSTGRES_DB=myapp_development
+    volumes:
+        - postgres-data:/var/lib/postgresql/data
