@@ -1,11 +1,13 @@
-import re
-from typing import Iterator, List, Tuple
-
-from xml.etree.ElementTree import iterparse, Element
-
+import bz2
+from os import link
 import mwparserfromhell as wp
+import re
+
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Dict, Iterator, List, Tuple
 from unidecode import unidecode
+from xml.etree.ElementTree import iterparse, Element
 
 
 class WikiXMLFile(object):
@@ -38,24 +40,6 @@ class WikiXMLFile(object):
         self.end_idx = end_idx
         self.path = path
 
-    def is_real_xml_bz2(self):
-        """Checks if the file specified in self.path is really a bzipped xml file
-
-        Valid files meet these criteria:
-        - .xml-p(.+)p(.+).bz2 files (i.e. have two suffixes)
-        - the first extension is a flavor of .xml-p(.+)p(.+)
-        - the second extension is .bz2
-        """
-        if self.path.is_file() == False:
-            return False
-        elif len(self.path.suffixes) != 2:
-            return False
-        elif re.search(r"^.xml-p(.+)p(.+)$", self.path.suffixes[0]) is None:
-            return False
-        elif self.path.suffixes[1] != ".bz2":
-            return False
-        return True
-
     def __eq__(self, other):
         """Equality method
 
@@ -80,16 +64,70 @@ class WikiXMLFile(object):
         else:
             return True
 
+    def is_real_xml_bz2(self):
+        """Checks if the file specified in self.path is really a bzipped xml file
+
+        Valid files meet these criteria:
+        - .xml-p(.+)p(.+).bz2 files (i.e. have two suffixes)
+        - the first extension is a flavor of .xml-p(.+)p(.+)
+        - the second extension is .bz2
+        """
+        if self.path.is_file() == False:
+            return False
+        elif len(self.path.suffixes) != 2:
+            return False
+        elif re.search(r"^.xml-p(.+)p(.+)$", self.path.suffixes[0]) is None:
+            return False
+        elif self.path.suffixes[1] != ".bz2":
+            return False
+        return True
+
+    @contextmanager
+    def parser(self):
+        """Context manager to yield a parser (iterator from
+        xml.etree.ElementTree.iterparse) for the .xml.bz2 file at self.path
+
+        Parameters
+        ----------
+
+        Yields
+        -------
+        parser : Iterator
+            from xml.etree.ElementTree.iterparse
+
+        Raises
+        ------
+        FileNotFoundError
+            if the file doesn't actually exist
+        """
+        if not self.is_real_xml_bz2():
+            raise FileNotFoundError(
+                "unable to create iterparser because the path is invalid: {}".format(
+                    self.path.as_posix()
+                )
+            )
+        file = bz2.open(self.path, "r")
+        parser = iterparse(file)
+        try:
+            yield parser
+        finally:
+            file.close()
+
+
+###################
+# Utility methods #
+###################
+
 
 def get_headings_sections(
-    element_text: str,
+    element: Element,
 ) -> Tuple[List[str], List[str]]:
-    """Extract a list of headings and the text of their respective sections from an article
+    """Extract a list of headings and the text of their respective sections from an article Element
 
     Parameters
     ----------
-    element_text : str
-        xml.etree.ElementTree.Element.text, the text to remove wikicode from
+    element : Element
+        xml.etree.ElementTree.Element, the element to get headings and sections from
 
     Returns
     -------
@@ -104,15 +142,22 @@ def get_headings_sections(
 
     Notes
     -----
-    This function will also transliterate any unicode to ascii using the unidecode
+    - intermediate results are explicitly deleted because otherwise they seem to build
+    up (THEORY: something in parser is stopping their reference counts from going to 0)
+    - Length of clean_headings is enforced to be same as length of clean_sections
+    - This function will also transliterate any unicode to ascii using the unidecode
     (https://github.com/avian2/unidecode) module
     """
-    wikicode = wp.parse(element_text)
+    if not isinstance(element, Element):
+        raise TypeError(
+            "invalid element. element must be an xml.etree.ElementTree.Element"
+        )
+    wikicode = wp.parse(element.text)
     raw_headings = wikicode.filter_headings()
     clean_headings = []
 
     raw_sections = []
-    remaining_text = element_text
+    remaining_text = element.text
     for i, heading in enumerate(raw_headings):
         if (
             i == 0
@@ -148,8 +193,49 @@ def get_headings_sections(
     return clean_headings, clean_sections
 
 
+def get_pagelinks(
+    element: Element,
+) -> List[str]:
+    """Extract a list of pagelinks from an article Element
+
+    Parameters
+    ----------
+    element : Element
+        xml.etree.ElementTree.Element, the element to get pagelinks from
+
+    Returns
+    -------
+    links : List[str]
+        links from the article to other articles
+
+    Notes
+    -----
+    This function will also transliterate any unicode to ascii using the unidecode
+    (https://github.com/avian2/unidecode) module
+    """
+    if not isinstance(element, Element):
+        raise TypeError(
+            "invalid element. element must be an xml.etree.ElementTree.Element"
+        )
+    wikicode = wp.parse(element.text)
+    raw_pagelinks = wikicode.filter_wikilinks()
+    clean_pagelinks = []
+    for raw_link in raw_pagelinks:
+        clean_link = wp.parse(raw_link).strip_code()
+        if not isinstance(clean_link, str):
+            continue  # drop non-strings
+        if re.search(r"thumb\|(.+)", clean_link) is not None:
+            continue  # drop image links
+        if re.search(r"Category:(.+)", clean_link) is not None:
+            continue  # drop category links
+        if clean_link.strip() == "":
+            continue  # drop empty/whitespace-only strings
+        clean_pagelinks.append(clean_link)
+    return clean_pagelinks
+
+
 def get_next_title_element(
-    parser: iterparse,
+    parser: Iterator,
 ) -> Tuple[str, Element]:
     """Get the next title and Element in namespace 0 (Main/Article) from an iterator
 
@@ -161,6 +247,13 @@ def get_next_title_element(
         theoretically work as long as the Iterator yields Elements as the second part
         of the tuple becaues we immediately throw away the event. See comment on the
         events in Notes below
+
+    Returns
+    -------
+    title : str
+        the title of the next page in namespace 0 (Main/Article) from parser
+    elem : Element
+        the Element with all the info about the page corresponding to title
 
     Raises
     ------
@@ -192,7 +285,7 @@ def get_next_title_element(
     """
     if not isinstance(parser, Iterator):
         raise TypeError(
-            "parser has to be an iterator craeted by xml.etree.ElementTree. invalid parser: {}".format(
+            "parser has to be an iterator created by xml.etree.ElementTree. invalid parser: {}".format(
                 parser
             )
         )
@@ -223,3 +316,79 @@ def get_next_title_element(
         matches = re.search(r"{(.+)}(redirect)", elem.tag)
         if matches is not None:
             title = None
+
+
+def wikifile_num_articles_longest_article(wiki_file: WikiXMLFile) -> Tuple[int, str]:
+    """Get the number of articles and longest article title in a WikiXMLFile
+
+    Parameters
+    ----------
+    wiki_file : WikiXMLFile
+        WikiXMLFile to load and read articles from. if invalid file, raises
+        FileNotFoundError
+
+    Returns
+    -------
+    num_articles : int
+        how many articles in namespace 0 (Main/Article) are in wiki_file
+    longest_article : str
+        name of longest article in namespace 0 (Main/Article) in wiki_file
+
+    Raises
+    ------
+    TypeError
+        if wiki_file isn't a WikiXMLFile
+    FileNotFoundError
+        if wiki_file isn't a valid file on disk
+
+    Notes
+    -----
+    """
+    if not isinstance(wiki_file, WikiXMLFile):
+        raise TypeError(
+            "invalid wiki_file. wiki_file has to be an instance of WikiXMLFile: {}".format(
+                wiki_file
+            )
+        )
+    if wiki_file.is_real_xml_bz2() == False:
+        raise FileNotFoundError(
+            "invalid wikifile. the file at {} doesn't exist".format(
+                wiki_file.path.as_posix
+            )
+        )
+    num_articles = 0
+    max_title_len = 0
+    longest_title = None
+    with bz2.open(wiki_file.path, "r") as f:
+        parser = iterparse(f)
+        while True:
+            title, elem = None, None
+            try:
+                title, elem = get_next_title_element(parser)
+                num_articles += 1
+            except StopIteration:
+                return num_articles, longest_title
+            if len(title) > max_title_len:
+                max_title_len = len(title)
+                longest_title = title
+            del title
+            elem.clear()
+            del elem
+
+
+if __name__ == "__main__":
+    from wikitools.wikipage import WikipediaPage
+
+    data_path = Path(
+        "/hdd/datasets/wikipedia_4_20_21/enwiki-20210420-pages-articles-multistream1.xml-p1p41242.bz2"
+    )
+    test_file = WikiXMLFile(1, 41242, data_path)
+    with test_file.parser as parser:
+        title, element = get_next_title_element(parser)
+        links = get_pagelinks(element)
+        # for link in links:
+        #     print(link)
+        # print(links)
+        headings, sections = get_headings_sections(element)
+        page = WikipediaPage(title, headings, sections, links)
+        print(page)

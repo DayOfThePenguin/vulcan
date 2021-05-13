@@ -8,42 +8,24 @@ from prefect import task, Flow
 from prefect.executors import DaskExecutor
 from typing import List, Tuple
 
-import wikitools.wikidump
+import wikitools.wikidump as wikidump
+import wikitools.wikixml as wikixml
 from wikitools.wikixml import WikiXMLFile
 
 
 @task
 def find_longest_article_in_xml_chunk(wiki_file: WikiXMLFile) -> Tuple[int, str]:
     logger = prefect.context.get("logger")
-    with bz2.open(wiki_file.path, "r") as f:
-        parser = iter(iterparse(f))
-        article_num = 0
-        max_title_len = 0
-        max_title_name = None
-
-        while True:
-            title, elem = None, None
-            try:
-                title, elem = wikitools.wikixml.get_next_title_element(parser)
-                article_num += 1
-            except StopIteration:
-                logger.info(
-                    "{} - total Number of Articles: {}\nlongest title ({}): {}".format(
-                        getpid(), article_num, max_title_len, max_title_name
-                    )
-                )
-                return max_title_len, max_title_name
-            if len(title) > max_title_len:
-                max_title_len = len(title)
-                max_title_name = title
-                logger.debug(
-                    "{} - New max length ({}): {}".format(
-                        getpid(), max_title_len, max_title_name
-                    )
-                )
-            del title
-            elem.clear()
-            del elem
+    (
+        num_articles,
+        longest_title,
+    ) = wikixml.wikifile_num_articles_longest_article(wiki_file)
+    logger.info(
+        "{} - total Number of Articles: {}\nlongest title ({}): {}".format(
+            getpid(), num_articles, len(longest_title), longest_title
+        )
+    )
+    return longest_title
 
 
 @task
@@ -58,7 +40,7 @@ def is_dump_contiguous(files: List[WikiXMLFile]) -> bool:
     specific case, a contiguous dump will also be a complete dump.
     """
     logger = prefect.context.get("logger")
-    result = wikitools.wikidump.verify_contiguous_dump(files)
+    result = wikidump.verify_contiguous_dump(files)
     if not result["contiguous"]:
         logger.error(
             """Missing files detected. Please download them and rerun this script to
@@ -76,7 +58,7 @@ def is_dump_contiguous(files: List[WikiXMLFile]) -> bool:
 
 @task
 def get_xml_files_from_data_path(data_path: Path) -> List[WikiXMLFile]:
-    sorted_files = wikitools.wikidump.load_wikifile_list(data_path)
+    sorted_files = wikidump.load_wikifile_list(data_path)
     return sorted_files
 
 
@@ -84,7 +66,7 @@ def get_xml_files_from_data_path(data_path: Path) -> List[WikiXMLFile]:
 def show_longest(longest_articles):
     logger = prefect.context.get("logger")
     for article in longest_articles:
-        logger.info(article)
+        logger.info("({}) - {}".format(len(article), article))
 
 
 @task

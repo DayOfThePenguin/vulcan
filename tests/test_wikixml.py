@@ -1,4 +1,4 @@
-"""Tests for the wikitools module
+"""Tests for the wikitools.wikixml module
 
 Coverage
 --------
@@ -122,9 +122,18 @@ class getNextTitleElementTest(unittest.TestCase):
 
     def test_params(self):
         """Verify parameter type-checking is correct"""
+        path = Path(
+            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
+        )
+        wiki_file = WikiXMLFile(20460153, 20570392, path)
+        with wiki_file.parser as parser:
+            title, elem = get_next_title_element(parser)
+            self.assertIsInstance(title, str)
+            self.assertIsInstance(elem, Element)
         invalid_parser = None
         with self.assertRaisesRegex(
-            TypeError, "parser has to be an iterator craeted by xml.etree.ElementTree"
+            TypeError,
+            r"(.+)invalid parser: (.+)",
         ):
             get_next_title_element(invalid_parser)
 

@@ -74,8 +74,8 @@ the end of each file `.xml-p(.+)p(.+)` indicate the page range. Set `data_path` 
 `dump-flow.py` to the location of your local copy of the database dump.
 
 ### Style
-Coding Style - [black](https://black.readthedocs.io/en/stable/)
-Docstring Format - [numpydoc](https://numpydoc.readthedocs.io/en/latest/example.html#example)
+- Coding Style - [black](https://black.readthedocs.io/en/stable/)
+- Docstring Format - [numpydoc](https://numpydoc.readthedocs.io/en/latest/example.html#example)
 
 ## Common issues
 1. Q: Module imports aren't working (some form of `ModuleNotFoundError: No module named 'wikimap'`)
