@@ -206,7 +206,7 @@ def get_pagelinks(
     Returns
     -------
     links : List[str]
-        links from the article to other articles
+        links from the article to other articles. each element is unidecoded
 
     Notes
     -----
@@ -230,6 +230,7 @@ def get_pagelinks(
             continue  # drop category links
         if clean_link.strip() == "":
             continue  # drop empty/whitespace-only strings
+        clean_link = unidecode(clean_link)
         clean_pagelinks.append(clean_link)
     return clean_pagelinks
 
@@ -251,7 +252,7 @@ def get_next_title_element(
     Returns
     -------
     title : str
-        the title of the next page in namespace 0 (Main/Article) from parser
+        the title of the next page in namespace 0 (Main/Article) from parser. unidecoded
     elem : Element
         the Element with all the info about the page corresponding to title
 
@@ -264,6 +265,8 @@ def get_next_title_element(
 
     Notes
     -----
+    title is unidecoded before being returned
+
     the events yielded as the first item from next(parser) have the form
     <class 'str'>
     'end'
@@ -311,7 +314,7 @@ def get_next_title_element(
         matches = re.search(r"{(.+)}(text)", elem.tag)
         if matches is not None:
             if title is not None:
-                return title, elem
+                return unidecode(title), elem
         # article redirect (redirect) matcher
         matches = re.search(r"{(.+)}(redirect)", elem.tag)
         if matches is not None:
@@ -383,7 +386,7 @@ if __name__ == "__main__":
         "/hdd/datasets/wikipedia_4_20_21/enwiki-20210420-pages-articles-multistream1.xml-p1p41242.bz2"
     )
     test_file = WikiXMLFile(1, 41242, data_path)
-    with test_file.parser as parser:
+    with test_file.parser() as parser:
         title, element = get_next_title_element(parser)
         links = get_pagelinks(element)
         # for link in links:

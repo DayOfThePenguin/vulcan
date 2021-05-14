@@ -55,7 +55,7 @@ in this directory
 
 connect to the postgres database and create a `wikipedia` database
 ```shell
-psql -h 127.0.0.1 -U postgres
+psql -h 127.0.0.1 -p 8001 -U postgres
 postgres=\# CREATE DATABASE wikipedia;
 ```
 

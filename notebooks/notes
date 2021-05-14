@@ -1,0 +1,4 @@
+dask-worker tcp://192.168.0.12:8786 --nprocs 5 --nthreads 1 --memory-limit=6e9
+19h 21m 39s
+4581000 rows
+14gb

@@ -1,0 +1,2 @@
+export PYTHONPATH=/home/user/Developer/active/wikimap
+source env/bin/activate
