@@ -4,3 +4,5 @@ env
 __pycache__
 *.bz2
 dask-worker-space
+duplicates_*
+*.prof
