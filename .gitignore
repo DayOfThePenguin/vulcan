@@ -6,3 +6,4 @@ __pycache__
 dask-worker-space
 duplicates_*
 *.prof
+logs/

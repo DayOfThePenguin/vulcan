@@ -1,4 +1,9 @@
+"""wikipage : module for defining WikipediaPage, an object fot storing information
+about a Wikipedia page
+"""
 from typing import List
+
+from db.models import Page
 
 
 class WikipediaPage(object):
@@ -14,56 +19,38 @@ class WikipediaPage(object):
         # Type-checking
         # title
         if not isinstance(title, str):
-            raise TypeError(
-                "WikipediaPage.title must be a string. invalid title: {}".format(title)
-            )
+            msg = "WikipediaPage.title must be a string. invalid title: {}"
+            raise TypeError(msg.format(title))
         # headings
         if not isinstance(headings, list):
-            raise TypeError(
-                "WikipediaPage.headings must be a list. invalid headings: {}".format(
-                    headings
-                )
-            )
+            msg = "WikipediaPage.headings must be a list. invalid headings: {}"
+            raise TypeError(msg.format(headings))
         for heading in headings:
             if not isinstance(heading, str):
-                raise TypeError(
-                    "WikipediaPage.headings items must be strings. invalid headings element: {}".format(
-                        heading
-                    )
-                )
+                msg = "WikipediaPage.headings items must be strings. invalid headings element: {}"
+                raise TypeError(msg.format(heading))
         # sections
         if not isinstance(sections, list):
-            raise TypeError(
-                "WikipediaPage.sections must be a list. invalid sections: {}".format(
-                    sections
-                )
-            )
+            msg = "WikipediaPage.sections must be a list. invalid sections: {}"
+            raise TypeError(msg.format(sections))
         for section in sections:
             if not isinstance(section, str):
-                raise TypeError(
-                    "WikipediaPage.sections items must be strings. invalid sections element: {}".format(
-                        section
-                    )
-                )
+                msg = "WikipediaPage.sections items must be strings. invalid sections element: {}"
+                raise TypeError(msg.format(section))
         # links
         if not isinstance(links, list):
-            raise TypeError(
-                "WikipediaPage.links must be a list. invalid links: {}".format(links)
-            )
+            msg = "WikipediaPage.links must be a list. invalid links: {}"
+            raise TypeError(msg.format(links))
         for link in links:
             if not isinstance(link, str):
-                raise TypeError(
-                    "WikipediaPage.links items must be strings. invalid links element: {}".format(
-                        link
-                    )
-                )
+                msg = "WikipediaPage.links items must be strings. invalid links element: {}"
+                raise TypeError(msg.format(link))
         # every heading must have a section
         if len(sections) != len(headings):
-            raise ValueError(
-                "headings ({}) must be the same length as sections ({}). every heading must have a section".format(
-                    sections, headings
-                )
-            )
+            msg = "len(headings) ({}) must be equal to len(sections) ({}). "
+            msg += "every heading must have a section"
+            msg = msg.format(sections, headings)
+            raise ValueError(msg)
         # variables
         self.title = title
         self.headings = headings
@@ -99,6 +86,25 @@ class WikipediaPage(object):
             return True
 
     def __repr__(self):
-        return "<Page: (\n\t title='{}',\n\t headings[:10]={},\n\t sections[0]={},\n\t links[:10]={}\n)>".format(
-            self.title, self.headings[:10], self.sections[0], self.links[:10]
+        msg = "<Page: (\n\t"
+        msg += "title='{}',\n\t".format(self.title)
+        msg += "headings[:10]={},\n\t".format(self.headings[:10])
+        msg += "sections[0]={},\n\t".format(self.sections)
+        msg += "links[:10]={}\n".format(self.links[:10])
+        msg += ")>"
+        return msg
+
+    def page(self):
+        """Make sqlalchemy representation of self
+        Returns
+        -------
+        page : models.Page
+            self represented as a Page from models.py to add to a database
+        """
+        page = Page(
+            title=self.title,
+            headings=self.headings,
+            sections=self.sections,
+            links=self.links,
         )
+        return page
