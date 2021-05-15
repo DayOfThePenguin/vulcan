@@ -9,14 +9,15 @@ Missing
 -------
 get_headsings_sections
 """
-import bz2
 from pathlib import Path
 import re
 import unittest
-from xml.etree.ElementTree import Element, iterparse
+from xml.etree.ElementTree import Element
 
-from wikitools.wikixml import WikiXMLFile, get_next_title_element
-import wikitools as wikitools
+import wikitools.wikixml as wikixml
+
+from wikitools.wikipage import WikipediaPage
+from wikitools.wikixml import WikiXMLFile
 
 
 class WikiXMLFileTest(unittest.TestCase):
@@ -75,8 +76,8 @@ class WikiXMLFileTest(unittest.TestCase):
             test_stem + test_suffix_one + ".txt",  # invalid second suffix
             test_stem + ".txt" + ".txt",  # both suffixes invalid
         ]
-        for i, f in enumerate(files_to_test):
-            path = Path(f)
+        for i, file in enumerate(files_to_test):
+            path = Path(file)
             path.touch()  # create temp file
             self.assertTrue(path.is_file())
             test_file = WikiXMLFile(0, 3, path)
@@ -105,11 +106,11 @@ class WikiXMLFileTest(unittest.TestCase):
         self.assertNotEqual(test_self, test_other)
 
 
-class getHeadingsSections(unittest.TestCase):
+class GetHeadingsSections(unittest.TestCase):
     pass
 
 
-class getNextTitleElementTest(unittest.TestCase):
+class GetNextTitleElementTest(unittest.TestCase):
     """Test wikixml.get_next_title_element
 
     Tests
@@ -126,8 +127,8 @@ class getNextTitleElementTest(unittest.TestCase):
             "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
         )
         wiki_file = WikiXMLFile(20460153, 20570392, path)
-        with wiki_file.parser as parser:
-            title, elem = get_next_title_element(parser)
+        with wiki_file.parser() as parser:
+            title, elem = wikixml.get_next_title_element(parser)
             self.assertIsInstance(title, str)
             self.assertIsInstance(elem, Element)
         invalid_parser = None
@@ -135,7 +136,7 @@ class getNextTitleElementTest(unittest.TestCase):
             TypeError,
             r"(.+)invalid parser: (.+)",
         ):
-            get_next_title_element(invalid_parser)
+            wikixml.get_next_title_element(invalid_parser)
 
     def test_return_types(self):
         """Verify that the return types are (str, xml.etree.ElementTree.Element)"""
@@ -143,9 +144,8 @@ class getNextTitleElementTest(unittest.TestCase):
             "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
         )
         wiki_file = WikiXMLFile(20460153, 20570392, path)
-        with bz2.open(wiki_file.path, "r") as f:
-            parser = iter(iterparse(f))
-            title, elem = wikitools.wikixml.get_next_title_element(parser)
+        with wiki_file.parser() as parser:
+            title, elem = wikixml.get_next_title_element(parser)
             self.assertIsInstance(title, str)
             self.assertIsInstance(elem, Element)
 
@@ -169,12 +169,11 @@ class getNextTitleElementTest(unittest.TestCase):
             "TimedText",
             "Module",
         ]
-        with bz2.open(wiki_file.path, "r") as f:
-            parser = iter(iterparse(f))
+        with wiki_file.parser() as parser:
             while True:
-                title, elem = None, None
                 try:
-                    title, elem = wikitools.wikixml.get_next_title_element(parser)
+                    title, elem = wikixml.get_next_title_element(parser)
+                    del elem
                 except StopIteration:
                     break
                 self.assertLessEqual(len(title), 200)  # titles are limited to 200 chars
@@ -190,12 +189,27 @@ class getNextTitleElementTest(unittest.TestCase):
             "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
         )
         wiki_file = WikiXMLFile(20460153, 20570392, path)
-        with bz2.open(wiki_file.path, "r") as f:
-            parser = iter(iterparse(f))
-            title, elem = wikitools.wikixml.get_next_title_element(parser)
+        with wiki_file.parser() as parser:
+            title, elem = wikixml.get_next_title_element(parser)
             print(title)
             print()
             print(type(elem.text))
+
+
+class IntegrationTest(unittest.TestCase):
+    parent = "/hdd/datasets/wikipedia_4_20_21/"
+    name = "enwiki-20210420-pages-articles-multistream1.xml-p1p41242.bz2"
+    data_path = Path(parent + name)
+    test_file = WikiXMLFile(1, 41242, data_path)
+    with test_file.parser() as parser:
+        title, element = wikixml.get_next_title_element(parser)
+        links = wikixml.get_pagelinks(element)
+        # for link in links:
+        #     print(link)
+        # print(links)
+        headings, sections = wikixml.get_headings_sections(element)
+        page = WikipediaPage(title, headings, sections, links)
+        print(page)
 
 
 if __name__ == "__main__":

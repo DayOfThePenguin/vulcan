@@ -3,7 +3,7 @@ about a Wikipedia page
 """
 from typing import List
 
-from db.models import Page
+from database.models import Page
 
 
 class WikipediaPage(object):
@@ -47,8 +47,8 @@ class WikipediaPage(object):
                 raise TypeError(msg.format(link))
         # every heading must have a section
         if len(sections) != len(headings):
-            msg = "len(headings) ({}) must be equal to len(sections) ({}). "
-            msg += "every heading must have a section"
+            msg = "len(headings) ({}) must equal len(sections) ({}). "
+            # msg += "every heading must have a section"
             msg = msg.format(sections, headings)
             raise ValueError(msg)
         # variables

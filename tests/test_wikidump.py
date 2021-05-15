@@ -8,18 +8,15 @@ Missing
 -------
 load_wikifile_list
 """
-import bz2
 from pathlib import Path
 import unittest
-from xml.etree.ElementTree import iterparse
 
 from wikitools.wikixml import WikiXMLFile
 import wikitools.wikidump
 
 
-class verifyContiguousDumpTest(unittest.TestCase):
-    def test_verify_contiguous_dump(self):
-        path = Path("test")
+class FindMissingDumpFilesTest(unittest.TestCase):
+    def test_find_missing_dump_files(self):
         # verify for valid data
         expected_dict = {
             "contiguous": True,
@@ -30,7 +27,7 @@ class verifyContiguousDumpTest(unittest.TestCase):
             WikiXMLFile(6, 10, Path("test_6_10")),
             WikiXMLFile(11, 15, Path("test_11_15")),
         ]
-        results = wikitools.wikidump.verify_contiguous_dump(files)
+        results = wikitools.wikidump.find_missing_dump_files(files)
         self.assertDictEqual(results, expected_dict)
         # verify for invalid data (end_idx[i] > start_idx[i+1])
         expected_dict = {
@@ -42,7 +39,7 @@ class verifyContiguousDumpTest(unittest.TestCase):
             WikiXMLFile(6, 10, Path("test_6_10")),
             WikiXMLFile(11, 15, Path("test_11_15")),
         ]
-        results = wikitools.wikidump.verify_contiguous_dump(invalid_files)
+        results = wikitools.wikidump.find_missing_dump_files(invalid_files)
         self.assertDictEqual(results, expected_dict)
         # verify for invalid data (end_idx[i] + 1 < start_idx[i+1])
         expected_dict = {
@@ -54,7 +51,7 @@ class verifyContiguousDumpTest(unittest.TestCase):
             WikiXMLFile(6, 10, Path("test_6_10")),
             WikiXMLFile(13, 15, Path("test_13_15")),
         ]
-        results = wikitools.wikidump.verify_contiguous_dump(invalid_files)
+        results = wikitools.wikidump.find_missing_dump_files(invalid_files)
         self.assertDictEqual(results, expected_dict)
 
 

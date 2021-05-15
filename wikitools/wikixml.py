@@ -1,44 +1,46 @@
 import bz2
-from os import link
-import mwparserfromhell as wp
 import re
 
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Iterator, List, Tuple
-from unidecode import unidecode
+from typing import Iterator, List, Tuple
 from xml.etree.ElementTree import iterparse, Element
+
+import mwparserfromhell as wp
+
+from unidecode import unidecode
 
 
 class WikiXMLFile(object):
     """Represent an XML chunk of a Wikipedia database dump"""
 
-    def __init__(self, start_idx: int, end_idx: int, path: Path) -> None:
+    def __init__(
+        self, start_idx: int, end_idx: int, path: Path, chunk_size: int = 2000
+    ) -> None:
         if not isinstance(start_idx, int):
-            raise TypeError(
-                "WikiXMLFile.start_idx must be an integer. invalid start_idx: {}".format(
-                    start_idx
-                )
-            )
+            msg = "WikiXMLFile.start_idx must be an integer. invalid start_idx: {}"
+            msg = msg.format(start_idx)
+            raise TypeError(msg)
         if not isinstance(end_idx, int):
-            raise TypeError(
-                "WikiXMLFile.end_idx must be an integer. invalid end_idx: {}".format(
-                    end_idx
-                )
-            )
+            msg = "WikiXMLFile.end_idx must be an integer. invalid end_idx: {}"
+            msg = msg.format(end_idx)
+            raise TypeError(msg)
         if not isinstance(path, Path):
-            raise TypeError(
-                "WikiXMLFile.path must be a pathlib.Path. invalid path: {}".format(path)
-            )
+            msg = "WikiXMLFile.path must be a pathlib.Path. invalid path: {}"
+            msg = msg.format(path)
+            raise TypeError(msg)
         if start_idx > end_idx:
-            raise ValueError(
-                "start_idx ({}) must be less than end_idx ({})".format(
-                    start_idx, end_idx
-                )
-            )
+            msg = "start_idx ({}) must be less than end_idx ({})"
+            msg = msg.format(start_idx, end_idx)
+            raise ValueError(msg)
         self.start_idx = start_idx
         self.end_idx = end_idx
         self.path = path
+        self.chunk_size = chunk_size
+        self.pages = 0
+        self.additions = 0
+        self.duplicates = 0
+        self.errors = 0
 
     def __eq__(self, other):
         """Equality method
@@ -72,7 +74,7 @@ class WikiXMLFile(object):
         - the first extension is a flavor of .xml-p(.+)p(.+)
         - the second extension is .bz2
         """
-        if self.path.is_file() == False:
+        if self.path.is_file() is False:
             return False
         elif len(self.path.suffixes) != 2:
             return False
@@ -101,11 +103,9 @@ class WikiXMLFile(object):
             if the file doesn't actually exist
         """
         if not self.is_real_xml_bz2():
-            raise FileNotFoundError(
-                "unable to create iterparser because the path is invalid: {}".format(
-                    self.path.as_posix()
-                )
-            )
+            msg = "unable to create iterparser because the path is invalid: {}"
+            msg = msg.format(self.path.as_posix())
+            raise FileNotFoundError(msg)
         file = bz2.open(self.path, "r")
         parser = iterparse(file)
         try:
@@ -149,9 +149,8 @@ def get_headings_sections(
     (https://github.com/avian2/unidecode) module
     """
     if not isinstance(element, Element):
-        raise TypeError(
-            "invalid element. element must be an xml.etree.ElementTree.Element"
-        )
+        msg = "invalid element. element must be an xml.etree.ElementTree.Element"
+        raise TypeError(msg)
     wikicode = wp.parse(element.text)
     raw_headings = wikicode.filter_headings()
     clean_headings = []
@@ -214,9 +213,8 @@ def get_pagelinks(
     (https://github.com/avian2/unidecode) module
     """
     if not isinstance(element, Element):
-        raise TypeError(
-            "invalid element. element must be an xml.etree.ElementTree.Element"
-        )
+        msg = "invalid element. element must be an xml.etree.ElementTree.Element"
+        raise TypeError(msg)
     wikicode = wp.parse(element.text)
     raw_pagelinks = wikicode.filter_wikilinks()
     clean_pagelinks = []
@@ -287,11 +285,9 @@ def get_next_title_element(
     matcher won't return a match for this page
     """
     if not isinstance(parser, Iterator):
-        raise TypeError(
-            "parser has to be an iterator created by xml.etree.ElementTree. invalid parser: {}".format(
-                parser
-            )
-        )
+        msg = "parser must be an iterator from xml.etree.ElementTree.parser(). invalid parser: {}"
+        msg = msg.format(parser)
+        raise TypeError(msg)
     title = None
 
     while True:
@@ -299,8 +295,8 @@ def get_next_title_element(
         try:
             event, elem = next(parser)
             del event
-        except StopIteration:
-            raise StopIteration("Reached the end of the parser")
+        except StopIteration as e:
+            raise StopIteration("Reached the end of the parser") from e
         # article title (title) matcher
         matches = re.search(r"{(.+)}(title)", elem.tag)
         if matches is not None:
@@ -348,22 +344,17 @@ def wikifile_num_articles_longest_article(wiki_file: WikiXMLFile) -> Tuple[int, 
     -----
     """
     if not isinstance(wiki_file, WikiXMLFile):
-        raise TypeError(
-            "invalid wiki_file. wiki_file has to be an instance of WikiXMLFile: {}".format(
-                wiki_file
-            )
-        )
+        msg = "invalid wiki_file. wiki_file has to be an instance of WikiXMLFile: {}"
+        msg = msg.format(wiki_file)
+        raise TypeError(msg)
     if wiki_file.is_real_xml_bz2() == False:
-        raise FileNotFoundError(
-            "invalid wikifile. the file at {} doesn't exist".format(
-                wiki_file.path.as_posix
-            )
-        )
+        msg = "invalid wikifile. the file at {} doesn't exist"
+        msg.format(wiki_file.path.as_posix)
+        raise FileNotFoundError(msg)
     num_articles = 0
     max_title_len = 0
     longest_title = None
-    with bz2.open(wiki_file.path, "r") as f:
-        parser = iterparse(f)
+    with wiki_file.parser() as parser:
         while True:
             title, elem = None, None
             try:
@@ -377,21 +368,3 @@ def wikifile_num_articles_longest_article(wiki_file: WikiXMLFile) -> Tuple[int, 
             del title
             elem.clear()
             del elem
-
-
-if __name__ == "__main__":
-    from wikitools.wikipage import WikipediaPage
-
-    data_path = Path(
-        "/hdd/datasets/wikipedia_4_20_21/enwiki-20210420-pages-articles-multistream1.xml-p1p41242.bz2"
-    )
-    test_file = WikiXMLFile(1, 41242, data_path)
-    with test_file.parser() as parser:
-        title, element = get_next_title_element(parser)
-        links = get_pagelinks(element)
-        # for link in links:
-        #     print(link)
-        # print(links)
-        headings, sections = get_headings_sections(element)
-        page = WikipediaPage(title, headings, sections, links)
-        print(page)

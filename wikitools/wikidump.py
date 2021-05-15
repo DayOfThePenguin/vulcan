@@ -1,18 +1,42 @@
-from pathlib import Path
+import multiprocessing as mp
 import re
+
+from pathlib import Path
 from typing import Dict, List
 
 from wikitools.wikixml import WikiXMLFile
 
 
-def verify_contiguous_dump(
-    unsorted_files: List[WikiXMLFile],
+def is_dump_contiguous(wiki_files: List[WikiXMLFile]) -> bool:
+    """Verifies is there are any gaps in the xml files in the dump.
+    THIS FUNCTION CAN NOT GUARANTEE THAT ALL FILES ARE PRESENT, IT CAN ONLY
+    VERIFY THAT YOU HAVE ALL FILES BETWEEN THE LOWEST START_IDX AND HIGHEST
+    END_IDX ARE PRESENT.
+
+    For ease of use, when downloading a new dump, it is best to download the
+    start and end files first, filling in the files inbetween after. In that
+    specific case, a contiguous dump will also be a complete dump.
+    """
+    contig_logger = mp.get_logger()
+    result = find_missing_dump_files(wiki_files)
+    if not result["contiguous"]:
+        contig_msg = "data_path is missing files. download them and rerun this script."
+        contig_logger.error(contig_msg)
+        contig_msg = "Incomplete database dump. last valid file is: {}"
+        contig_msg = contig_msg.format(result["last_valid_file"].path.name)
+        raise FileNotFoundError(contig_msg)
+    else:
+        return True
+
+
+def find_missing_dump_files(
+    files: List[WikiXMLFile],
 ) -> Dict[bool, WikiXMLFile]:
     """Verifies is there are any gaps in the xml files in the dump.
 
     Parameters
     ----------
-    unsorted_files : List[WikiXMLFile]
+    files : List[WikiXMLFile]
         a list of WikiXMLFiles, not necessarily sorted by lowest WikiXMLFile.start_idx
 
     Returns
@@ -34,7 +58,7 @@ def verify_contiguous_dump(
     start and end files first, filling in the files inbetween after. In that
     specific case, a contiguous dump will also be a complete dump.
     """
-    sorted_files = sorted(unsorted_files, key=lambda file: file.start_idx)
+    sorted_files = sorted(files, key=lambda file: file.start_idx)
     result = {"contiguous": True, "last_valid_file": sorted_files[-1]}
 
     last_end_idx = 0
@@ -67,7 +91,7 @@ def load_wikifile_list(data_path: Path) -> List[WikiXMLFile]:
     NotADirectoryError
         If data_path points to a file and not a directory
     """
-    if data_path.exists() == False:
+    if data_path.exists() is False:
         raise FileNotFoundError("Could not find directory {}".format(data_path))
     elif data_path.is_file():
         raise NotADirectoryError(

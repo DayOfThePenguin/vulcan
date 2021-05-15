@@ -9,7 +9,6 @@ Missing
 
 """
 import unittest
-from xml.etree.ElementTree import Element, iterparse
 
 from wikitools.wikipage import WikipediaPage
 
@@ -75,7 +74,7 @@ class WikipediaPageTest(unittest.TestCase):
         # len(headings) != len(sections)
         with self.assertRaisesRegex(
             ValueError,
-            r"headings \((.+)\) must be the same length as sections \((.+)\)",
+            r"len\(headings\) \((.+)\) must equal len\(sections\) \((.+)\)(.+)",
         ):
             WikipediaPage(title, invalid_long_headings, string_list, string_list)
 
