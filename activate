@@ -1,2 +1,2 @@
-export PYTHONPATH=/home/user/Developer/active/wikimap
+export PYTHONPATH=$(pwd)
 source env/bin/activate
