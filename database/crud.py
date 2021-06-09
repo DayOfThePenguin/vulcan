@@ -5,7 +5,7 @@ from typing import List, TextIO, Tuple
 
 from sqlalchemy.orm import sessionmaker
 
-from database.models import Page
+from database.models import PageText
 from wikitools.wikipage import WikipediaPage
 from wikitools.wikixml import WikiXMLFile
 
@@ -28,7 +28,7 @@ def commit_list_to_db(
     duplicates = 0
     for _ in range(len(pages_to_commit)):
         page = pages_to_commit.pop()
-        if sess.query(Page).filter_by(title=page.title).first() is None:
+        if sess.query(PageText).filter_by(title=page.title).first() is None:
             try:  # if page isn't in db
                 sess.add(page.page())
                 additions += 1
