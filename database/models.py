@@ -7,6 +7,8 @@ https://stackoverflow.com/questions/28829236/is-it-possible-to-ignore-one-single
 https://stackoverflow.com/questions/53063778/case-insensitive-indexing-in-postgres-with-sqlalchemy
 https://stackoverflow.com/questions/14419299/adding-indexes-to-sqlalchemy-models-after-table-creation
 """
+import logging
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy import func, Column, Index, Integer, Text, String
@@ -26,7 +28,7 @@ class CaseInsensitiveComparator(Comparator):
 class Page(Base):
     __tablename__ = "page"
     page_id = Column(Integer, primary_key=True)
-    page_title = Column(String(200))
+    page_title = Column(String(200), unique=True)
 
     def __repr__(self):
         msg = "<Page: (\n\t"
@@ -44,26 +46,42 @@ class Page(Base):
         return CaseInsensitiveComparator(cls.page_title)
 
 
-page_title_index = Index("page_title_index", func.lower(Page.page_title))
+class PageTalk(Base):
+    __tablename__ = "talk"
+    page_id = Column(Integer, primary_key=True)
+    page_title = Column(String(200), ForeignKey(Page.page_title), unique=True)
+
+    page = relationship("Page", foreign_keys="PageTalk.page_title")
+
+    def __repr__(self):
+        msg = "<PageTalk: (\n\t"
+        msg += "page_id={},\n\t".format(self.page_id)
+        msg += "page_title='{}',\n\t".format(self.page_title)
+        msg += ")>"
+        return msg
+
+    @hybrid_property
+    def title_insensitive(self):
+        return self.page_title.lower()
+
+    @title_insensitive.comparator
+    def title_insensitive(cls):  # pylint: disable=no-self-argument
+        return CaseInsensitiveComparator(cls.page_title)
 
 
 class PageQuality(Base):
     __tablename__ = "quality"
-    page_id = Column(Integer, ForeignKey(Page.page_id), primary_key=True)
+    page_id = Column(Integer, ForeignKey(PageTalk.page_id), primary_key=True)
     page_quality = Column(String(2))
 
-    page = relationship("Page", foreign_keys="PageQuality.page_id")
+    page = relationship("PageTalk", foreign_keys="PageQuality.page_id")
 
-    @hybrid_property
-    def quality_insensitive(self):
-        return self.page_quality.lower()
-
-    @quality_insensitive.comparator
-    def quality_insensitive(cls):  # pylint: disable=no-self-argument
-        return CaseInsensitiveComparator(cls.page_quality)
-
-
-quality_index = Index("quality_index", func.lower(PageQuality.page_quality))
+    def __repr__(self):
+        msg = "<PageQuality: (\n\t"
+        msg += "page_id={},\n\t".format(self.page_id)
+        msg += "page_quality='{}',\n\t".format(self.page_quality)
+        msg += ")>"
+        return msg
 
 
 class PageText(Base):
@@ -91,29 +109,66 @@ class PageText(Base):
         return msg
 
 
-text_title_index = Index("title_index", func.lower(PageText.title))
+# Page
+page_title_index = Index("page_title", Page.page_title)
+page_title_lower_index = Index("page_title_lower", func.lower(Page.page_title))
+
+# PageTalk
+talk_title_index = Index("talk_title_lower", func.lower(PageTalk.page_title))
+
+# PageQuality
+quality_quality_index = Index("quality_quality", PageQuality.page_quality)
+
+# PageText
+text_title_lower_index = Index("text_title_lower", func.lower(PageText.title))
+
+
+def create_indices(engine):
+    """Create indices for all tables in a wikimap database
+
+    if you're recreating the database from scratch, comment these indices
+    out so you can insert without recomputing the index every query
+    After you've built the DB, come back and add these before doing any queries
+    do you can query lowercased indexed titles
+    To delete: Index("title", func.lower(PageText.title)).drop(bind=engine)
+    """
+
+    # Page indices
+    try:
+        page_title_index.create(bind=engine)
+        logging.info("Created Page Index page_title")
+    except ProgrammingError:
+        logging.info("Page Index page_title already exists")
+    try:
+        page_title_lower_index.create(bind=engine)
+        logging.info("Created Page Index page_title_lower")
+    except ProgrammingError:
+        logging.info("Page Index page_title_lower already exists")
+    # PageTalk indices
+    try:
+        talk_title_index.create(bind=engine)
+        logging.info("Created PageTalk Index talk_title_lower")
+    except ProgrammingError:
+        logging.info("PageTalk Index talk_title_lower already exists")
+    # PageQuality indices
+    try:
+        quality_quality_index.create(bind=engine)
+        logging.info("Created PageQuality Index quality_lower")
+    except ProgrammingError:
+        logging.info("PageQuality Index quality_lower already exists")
+    # PageText indices
+    try:
+        text_title_lower_index.create(bind=engine)
+        logging.info("Created PageText Index text_title_lower")
+    except ProgrammingError:
+        logging.info("PageText Index text_title_lower already exists")
+
 
 if __name__ == "__main__":
     from database.config import get_engine
 
+    logging.basicConfig(level=logging.INFO)
     DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/complete_wikipedia"
     engine = get_engine(DATABASE_URI)
     Base.metadata.create_all(engine)
-    # if you're recreating the database from scratch, comment these indices
-    # out so you can insert without recomputing the index every query
-    # After you've built the DB, come back and add these before doing any queries
-    # do you can query lowercased indexed titles
-    try:
-        text_title_index.create(bind=engine)
-    except ProgrammingError:
-        "Index already exists, passing"
-
-    try:
-        page_title_index.create(bind=engine)
-    except ProgrammingError:
-        "Index already exists, passing"
-
-    # try:
-    #     quality_index.create(bind=engine)
-    # except ProgrammingError:
-    #     "Index already exists, passing"
+    create_indices(engine)
