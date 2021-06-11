@@ -9,3 +9,4 @@ duplicates_*
 logs*
 
 *.npy
+*.sql

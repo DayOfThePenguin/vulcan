@@ -46,6 +46,21 @@ class Page(Base):
         return CaseInsensitiveComparator(cls.page_title)
 
 
+class PageLink(Base):
+    __tablename__ = "link"
+    pl_from = Column(Integer, ForeignKey(Page.page_id), primary_key=True)
+    pl_titles = Column(ARRAY(String(200)))
+
+    page = relationship("Page", foreign_keys="PageLink.pl_from")
+
+    def __repr__(self):
+        msg = "<PageLink: (\n\t"
+        msg += "pl_id={},\n\t".format(self.page_id)
+        msg += "pl_titles='{}',\n\t".format(self.page_title)
+        msg += ")>"
+        return msg
+
+
 class PageTalk(Base):
     __tablename__ = "talk"
     page_id = Column(Integer, primary_key=True)
@@ -74,7 +89,7 @@ class PageQuality(Base):
     page_id = Column(Integer, ForeignKey(PageTalk.page_id), primary_key=True)
     page_quality = Column(String(2))
 
-    page = relationship("PageTalk", foreign_keys="PageQuality.page_id")
+    page_talk = relationship("PageTalk", foreign_keys="PageQuality.page_id")
 
     def __repr__(self):
         msg = "<PageQuality: (\n\t"

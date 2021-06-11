@@ -26,3 +26,9 @@ networks:
     integration:
         external:
             name: integration-net
+
+# Postgres Config:
+# select name, setting from pg_settings where name = 'shared_buffers';
+# ALTER SYSTEM SET effective_cache_size='16GB';
+# ALTER SYSTEM SET shared_buffers='8GB';
+# ALTER SYSTEM SET work_mem='100MB';
