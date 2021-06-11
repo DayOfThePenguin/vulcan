@@ -4,7 +4,9 @@
 			"path": ".."
 		}
 	],
-	"settings": {},
+	"settings": {
+		"python.pythonPath": "env/bin/python"
+	},
 	"launch": {
 		"version": "0.2.0",
 		"configurations": [

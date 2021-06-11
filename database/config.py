@@ -24,12 +24,15 @@ DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/wikipedia"
 # leave container port the same
 
 
-def get_sessionmaker():
-    engine = get_engine()
-    sm = sessionmaker(bind=engine)
-    return sm
+def get_sessionmaker(db_uri=None, engine=None):
+    if engine is None:
+        engine = get_engine(db_uri)
+    smaker = sessionmaker(bind=engine)
+    return smaker
 
 
-def get_engine():
-    engine = create_engine(DATABASE_URI)
+def get_engine(db_uri=None):
+    if db_uri is None:
+        db_uri = DATABASE_URI
+    engine = create_engine(db_uri)
     return engine

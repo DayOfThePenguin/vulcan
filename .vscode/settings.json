@@ -1,5 +1,6 @@
 {
     "python.pythonPath": "env/bin/python",
+    "python.envFile": "${workspaceFolder}/.vscode/.env",
     "editor.formatOnSave": true,
     "python.testing.unittestArgs": [
         "-v",

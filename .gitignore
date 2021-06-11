@@ -7,3 +7,6 @@ dask-worker-space
 duplicates_*
 *.prof
 logs*
+
+*.npy
+*.sql
