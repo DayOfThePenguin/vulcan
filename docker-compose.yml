@@ -32,3 +32,4 @@ networks:
 # ALTER SYSTEM SET effective_cache_size='16GB';
 # ALTER SYSTEM SET shared_buffers='8GB';
 # ALTER SYSTEM SET work_mem='100MB';
+# ALTER SYSTEM SET max_wal_size='1GB';
