@@ -23,7 +23,7 @@ devtools==0.6.1
 dnspython==2.1.0
 email-validator==1.1.2
 entrypoints==0.3
-fastapi==0.65.1
+fastapi==0.65.2
 gitdb==4.0.7
 GitPython==3.1.17
 graphene==2.1.8
