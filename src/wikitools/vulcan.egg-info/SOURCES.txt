@@ -1,0 +1,8 @@
+COPYING
+README.md
+pyproject.toml
+setup.cfg
+wikitools/vulcan.egg-info/PKG-INFO
+wikitools/vulcan.egg-info/SOURCES.txt
+wikitools/vulcan.egg-info/dependency_links.txt
+wikitools/vulcan.egg-info/top_level.txt

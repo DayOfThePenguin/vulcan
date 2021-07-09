@@ -9,14 +9,14 @@ from pathlib import Path
 
 
 # local modules from PYTHONPATH
-import wikitools.wikidump as wikidump
-import wikitools.wikixml as wikixml
+import src.wikitools.wikidump as wikidump
+import src.wikitools.wikixml as wikixml
 
-import database.crud
-import database.config
+import src.database.crud
+import src.database.config
 
-from wikitools.wikixml import WikiXMLFile
-from wikitools.wikipage import WikipediaPage
+from src.wikitools.wikixml import WikiXMLFile
+from src.wikitools.wikipage import WikipediaPage
 
 
 def closing_msg(file: WikiXMLFile):
