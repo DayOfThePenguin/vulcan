@@ -9,19 +9,20 @@ from pathlib import Path
 
 
 # local modules from PYTHONPATH
-import src.wikitools.wikidump as wikidump
-import src.wikitools.wikixml as wikixml
+import vulcan.wikitools.wikidump as wikidump
+import vulcan.wikitools.wikixml as wikixml
 
-import src.database.crud
-import src.database.config
+import vulcan.database.crud
+import vulcan.database.config
 
-from src.wikitools.wikixml import WikiXMLFile
-from src.wikitools.wikipage import WikipediaPage
+from vulcan.wikitools.wikixml import WikiXMLFile
+from vulcan.wikitools.wikipage import WikipediaPage
 
 
 def closing_msg(file: WikiXMLFile):
 
-    close_msg = "********\nFINISHED PROCESSING {}\n".format(str(file.path.name))
+    close_msg = "********\nFINISHED PROCESSING {}\n".format(
+        str(file.path.name))
     close_msg += "{} total pages\n".format(file.pages)
     close_msg += "{} total additions\n".format(file.additions)
     close_msg += "{} total duplicates\n".format(file.duplicates)
@@ -35,7 +36,8 @@ def get_stats_dup_names(file: WikiXMLFile) -> Tuple[str, str]:
     dup_name = "logs/duplicates_{}_{}_{}.txt"
     dup_name = dup_name.format(file.start_idx, file.end_idx, worker_start)
     stats_name = "logs/statspid_{}_{}_{}_{}.txt"
-    stats_name = stats_name.format(getpid(), worker_start, file.start_idx, file.end_idx)
+    stats_name = stats_name.format(
+        getpid(), worker_start, file.start_idx, file.end_idx)
     return stats_name, dup_name
 
 
@@ -125,11 +127,13 @@ if __name__ == "__main__":
                 logger.info(msg)
                 main_stats.write(msg + "\n")
                 worker.join()
-                msg = "successfully joined completed worker {}".format(worker.pid)
+                msg = "successfully joined completed worker {}".format(
+                    worker.pid)
                 logger.info(msg)
                 main_stats.write(msg + "\n")
         if len(workers) == MAX_WORKERS:  # if all workers still alive
-            logger.info("no completed workers. sleeping for %i minutes", sleep_time)
+            logger.info(
+                "no completed workers. sleeping for %i minutes", sleep_time)
             sleep(sleep_time * 60)  # wait 10 minutes
             logger.info(
                 "main thread woke up, checking if there are any completed workers"
