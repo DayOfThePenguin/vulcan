@@ -1,4 +1,4 @@
-# Wikimap - Visualize the connections between ideas
+# Vulcan - Reconstruct Wikipedia Database Dumps
 [![Sample Map](static/map.gif "Sample Wikimap")](https://dayofthepenguin.github.io/wikimap/interactive_demo.html)
 
 ## Examples:

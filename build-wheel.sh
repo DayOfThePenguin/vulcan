@@ -14,5 +14,5 @@ pip install -U setuptools wheel setuptools-rust
 python setup.py bdist_wheel
 
 # Cleanup
-rm -rf build/*
+rm -rf build
 rm -rf build-env

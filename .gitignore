@@ -11,6 +11,7 @@ logs*
 
 *.npy
 *.sql
+*.egg-info
 
 
 # Added by cargo
