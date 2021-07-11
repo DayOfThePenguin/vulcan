@@ -1,0 +1,15 @@
+[package]
+name = "vulcan"
+version = "0.1.0"
+authors = ["Colin Dablain <colin.dablain@r3th.ink>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "vulcan"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.12"
+libc = "0.2"

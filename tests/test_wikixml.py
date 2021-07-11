@@ -123,9 +123,7 @@ class GetNextTitleElementTest(unittest.TestCase):
 
     def test_params(self):
         """Verify parameter type-checking is correct"""
-        path = Path(
-            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
-        )
+        path = Path("tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2")
         wiki_file = WikiXMLFile(20460153, 20570392, path)
         with wiki_file.parser() as parser:
             title, elem = wikixml.get_next_title_element(parser)
@@ -140,9 +138,7 @@ class GetNextTitleElementTest(unittest.TestCase):
 
     def test_return_types(self):
         """Verify that the return types are (str, xml.etree.ElementTree.Element)"""
-        path = Path(
-            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
-        )
+        path = Path("tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2")
         wiki_file = WikiXMLFile(20460153, 20570392, path)
         with wiki_file.parser() as parser:
             title, elem = wikixml.get_next_title_element(parser)
@@ -152,9 +148,7 @@ class GetNextTitleElementTest(unittest.TestCase):
     def test_returns_only_articles(self):
         """Verify that all page namespaces except ns 0 (Main/Article) are excluded
         from results"""
-        path = Path(
-            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
-        )
+        path = Path("tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2")
         wiki_file = WikiXMLFile(20460153, 20570392, path)
         namespaces = [  # listed at https://en.wikipedia.org/wiki/Wikipedia:Namespace
             "User",
@@ -185,9 +179,7 @@ class GetNextTitleElementTest(unittest.TestCase):
         TODO: TBH doesn't do anything, not sure how to actually test that the content
         coming out of the files is valid...
         """
-        path = Path(
-            "tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2"
-        )
+        path = Path("tests/enwiki-20210420-pages-articles-multistream16.xml-p20460153p20570392.bz2")
         wiki_file = WikiXMLFile(20460153, 20570392, path)
         with wiki_file.parser() as parser:
             title, elem = wikixml.get_next_title_element(parser)

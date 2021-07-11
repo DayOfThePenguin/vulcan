@@ -7,6 +7,20 @@
 [Orbiting Map](https://dayofthepenguin.github.io/wikimap/orbiting_demo.html)
 
 ## Installation:
+Build dev version
+```shell
+python ./setup.py develop
+```
+### Building Wheels
+from [setuptools-rust](https://github.com/PyO3/setuptools-rust#binary-wheels-on-linux)
+
+```shell
+docker pull quay.io/pypa/manylinux2014_x86_64
+```
+
+```shell
+docker run --rm -v `pwd`:/io quay.io/pypa/manylinux2014_x86_64 bash /io/build-wheels.sh
+```
 
 ### Clone this repository
 

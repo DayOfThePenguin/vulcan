@@ -11,3 +11,9 @@ logs*
 
 *.npy
 *.sql
+
+
+# Added by cargo
+
+/target
+Cargo.lock
