@@ -73,9 +73,7 @@ def create_logger(config: LogConfig = LogConfig()) -> Logger:
 
     logger = mp.get_logger()
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        "[%(asctime)s| %(levelname)s| %(processName)s] %(message)s"
-    )
+    formatter = logging.Formatter("[%(asctime)s| %(levelname)s| %(processName)s] %(message)s")
     handler = logging.FileHandler(f"logs/{config.file_name}.log")
     handler.setFormatter(formatter)
 

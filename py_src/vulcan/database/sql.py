@@ -7,9 +7,7 @@ from pydantic import validate_arguments
 
 line_start_ex = re.compile(b"INSERT INTO (.*?) VALUES ")
 # pylint: disable=anomalous-backslash-in-string
-categorylink_item_ex = re.compile(
-    b"\((.*?),'(.*?)','(.*?)','(.*?)','(.*?)','(.*?)','(.*?)'\)"
-)
+categorylink_item_ex = re.compile(b"\((.*?),'(.*?)','(.*?)','(.*?)','(.*?)','(.*?)','(.*?)'\)")
 page_item_ex = re.compile(b"\((.*?),(.*?),'(.*?)',(.*?),(.*?),(.*?)\)")
 link_item_ex = re.compile(b"\((.*?),(.*?),'(.*?)',(.*?)\)")
 

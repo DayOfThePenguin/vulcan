@@ -237,9 +237,7 @@ def etl_page(page_file: Path, namespace: int = 0):
         global NAMESPACE
         NAMESPACE = namespace
         with ProcessPoolExecutor() as executor:
-            for i, result in enumerate(
-                executor.map(transform_load_line, chunk_dir.iterdir())
-            ):
+            for i, result in enumerate(executor.map(transform_load_line, chunk_dir.iterdir())):
                 pages_added += result[0]
                 for skip in result[1]:
                     skipped_pages.append(skip)
@@ -260,9 +258,7 @@ def etl_page(page_file: Path, namespace: int = 0):
 
 if __name__ == "__main__":
     main_logger = create_logger()
-    data_file = Path(
-        "/home/user/Developer/active/restore_wiki/data/enwiki-20210520-page.sql"
-    )
+    data_file = Path("/home/user/Developer/active/restore_wiki/data/enwiki-20210520-page.sql")
     with get_engine(DATABASE_URI) as engine:
         drop_recreate_all_tables_except_text(engine)
         smaker = get_sessionmaker(engine=engine)
