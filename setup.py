@@ -15,7 +15,7 @@ setup(
     url="https://github.com/DayOfThePenguin/vulcan",
     python_requires=">=3.8",
     rust_extensions=[RustExtension(
-        "hello_rust.hello_rust", binding=Binding.PyO3)],
+        "vulcan.rust2py", binding=Binding.PyO3)],
     classifiers=[
         "Development Status: : 3 - Alpha",
         "Programming Language:: Python:: 3.8",
