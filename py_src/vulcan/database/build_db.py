@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from database.pages import etl_page
+from database.page import etl_page
 
 
 class DatabaseConfig(BaseModel):
@@ -8,4 +8,5 @@ class DatabaseConfig(BaseModel):
 
 
 def build_db():
-    etl_page()
+    pass
+    # etl_page()
