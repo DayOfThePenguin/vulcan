@@ -21,7 +21,6 @@ import multiprocessing as mp
 from logging import Logger
 from pathlib import Path
 
-
 from pydantic import BaseModel, validate_arguments, validator
 
 
@@ -73,7 +72,8 @@ def create_logger(config: LogConfig = LogConfig()) -> Logger:
 
     logger = mp.get_logger()
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("[%(asctime)s| %(levelname)s| %(processName)s] %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s| %(levelname)s| %(processName)s] %(message)s")
     handler = logging.FileHandler(f"logs/{config.file_name}.log")
     handler.setFormatter(formatter)
 

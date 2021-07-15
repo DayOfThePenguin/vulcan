@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
-from wikitools.wikixml import WikiXMLFile
+from wikitools import WikiXMLFile
 
 
 def is_dump_contiguous(wiki_files: List[WikiXMLFile]) -> bool:
@@ -92,7 +92,8 @@ def load_wikifile_list(data_path: Path) -> List[WikiXMLFile]:
         If data_path points to a file and not a directory
     """
     if data_path.exists() is False:
-        raise FileNotFoundError("Could not find directory {}".format(data_path))
+        raise FileNotFoundError(
+            "Could not find directory {}".format(data_path))
     elif data_path.is_file():
         raise NotADirectoryError(
             """data_path '{}' is a file. Please set data_path to the directory

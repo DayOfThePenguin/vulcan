@@ -38,7 +38,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
 
-DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/wikipedia"
+DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/complete_wikipedia"
 
 
 def get_sessionmaker(db_uri: str = None, engine: Engine = None) -> Generator:

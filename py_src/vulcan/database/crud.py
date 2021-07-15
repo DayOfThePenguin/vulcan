@@ -5,9 +5,10 @@ from typing import List, TextIO, Tuple
 
 from sqlalchemy.orm import sessionmaker
 
-from database.models import PageText
-from wikitools.wikipage import WikipediaPage
-from wikitools.wikixml import WikiXMLFile
+from ..wikitools import WikipediaPage
+from ..wikitools import WikiXMLFile
+
+from .models import PageText
 
 
 def commit_list_to_db(

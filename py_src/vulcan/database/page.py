@@ -32,11 +32,11 @@ from typing import Iterable, List
 from blist import blist
 from pydantic import validate_arguments
 
-from database.config import get_sessionmaker, get_engine
-from database.indices import create_page_indices
-from database.models import Page, PageTalk, drop_recreate_all_tables_except_text
-from database.sql import get_line_iterator, LineEnum, data_lines_generator
-from utils import create_logger
+from database import get_sessionmaker, get_engine
+from .indices import create_page_indices
+from .models import Page, PageTalk, drop_recreate_all_tables_except_text
+from .sql import get_line_iterator, LineEnum, data_lines_generator
+from .utils import create_logger
 
 DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/complete_wikipedia"
 NAMESPACE = None
@@ -136,7 +136,8 @@ def load_page_talks(pages_chunk: blist) -> List[List]:
                 if len(title) > 200:
                     skipped_pages.append(row)
                     continue  # ignore titles > 200 chars
-                result = sess.query(Page).filter(Page.page_title == title).first()
+                result = sess.query(Page).filter(
+                    Page.page_title == title).first()
                 if result is None:
                     skipped_pages.append(row)
                     if len(skipped_pages) % 50000 == 0:
@@ -249,7 +250,8 @@ def etl_page(page_file: Path, namespace: int = 0):
                         len(skipped_pages),
                     )
         logger.info("FINAL: %i pages loaded", pages_added)
-        logger.info("Skipped %i namespace %i pages", len(skipped_pages), namespace)
+        logger.info("Skipped %i namespace %i pages",
+                    len(skipped_pages), namespace)
 
         print("post-shutdown")
     gc.collect()
@@ -258,7 +260,8 @@ def etl_page(page_file: Path, namespace: int = 0):
 
 if __name__ == "__main__":
     main_logger = create_logger()
-    data_file = Path("/home/user/Developer/active/restore_wiki/data/enwiki-20210520-page.sql")
+    data_file = Path(
+        "/home/user/Developer/active/restore_wiki/data/enwiki-20210520-page.sql")
     with get_engine(DATABASE_URI) as engine:
         drop_recreate_all_tables_except_text(engine)
         smaker = get_sessionmaker(engine=engine)

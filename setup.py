@@ -25,9 +25,10 @@ setup(
     install_requires=[
         "blist==1.3.6",
         "mwparserfromhell==0.6.2",
+        "psycopg2==2.9.1",
         "pydantic==1.8.2",
         "SQLAlchemy==1.4.20",
-        "Unidecode==1.2.0"
+        "Unidecode==1.2.0",
     ],
     package_dir={"": "py_src"},
     packages=[
