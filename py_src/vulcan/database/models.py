@@ -32,7 +32,7 @@ from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import ForeignKey
 
-from utils import create_logger
+from .utils import create_logger
 
 
 Base = declarative_base()

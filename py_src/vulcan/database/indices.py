@@ -19,9 +19,9 @@ from sqlalchemy import func, Index
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.engine import Engine
 
-from database.config import get_engine
-from database.models import Page, PageText, PageTalk, PageQuality
-from utils import create_logger
+from database import get_engine
+from database import Page, PageText, PageTalk, PageQuality
+from .utils import create_logger
 
 
 page_title_index = Index("page_title", Page.page_title)

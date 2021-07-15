@@ -3,7 +3,7 @@ about a Wikipedia page
 """
 from typing import List
 
-from database.models import Page
+from ..database import Page
 
 
 class WikipediaPage(object):

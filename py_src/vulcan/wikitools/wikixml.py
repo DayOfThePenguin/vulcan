@@ -14,9 +14,7 @@ from unidecode import unidecode
 class WikiXMLFile(object):
     """Represent an XML chunk of a Wikipedia database dump"""
 
-    def __init__(
-        self, start_idx: int, end_idx: int, path: Path, chunk_size: int = 2000
-    ) -> None:
+    def __init__(self, start_idx: int, end_idx: int, path: Path, chunk_size: int = 2000) -> None:
         if not isinstance(start_idx, int):
             msg = "WikiXMLFile.start_idx must be an integer. invalid start_idx: {}"
             msg = msg.format(start_idx)
@@ -158,9 +156,7 @@ def get_headings_sections(
     raw_sections = []
     remaining_text = element.text
     for i, heading in enumerate(raw_headings):
-        if (
-            i == 0
-        ):  # The first section (Lead) won't have a title because it is implicitly assumed
+        if i == 0:  # The first section (Lead) won't have a title because it is implicitly assumed
             clean_headings.append("Lead")
             clean_headings.append(
                 raw_headings[i].title.strip_code().strip()
