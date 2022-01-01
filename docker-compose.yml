@@ -4,23 +4,66 @@ version: '3'
 volumes:
     postgres-data:
 
+        null
 services:
-  database:
-    container_name: wikipediadata
-    image: postgres
-    # Create the necessary environment variables.
-    # env_file:
-    #     - .env/development/database
-    networks:
-        - integration
-    ports:
-        - 5432:5432
-    environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=postgres
-    volumes:
-        - postgres-data:/var/lib/postgresql/data
+    zero:
+        image: dgraph/dgraph:latest
+        volumes:
+            - /hdd/dgraph:/dgraph
+        networks:
+            - integration
+        ports:
+            - 5080:5080
+            - 6080:6080
+        restart: on-failure
+        command: dgraph zero --my=zero:5080 --telemetry "sentry=false;"
 
+    alpha:
+        image: dgraph/dgraph:latest
+        volumes:
+            - /hdd/dgraph:/dgraph
+        networks:
+            - integration
+        ports:
+            - 8080:8080
+            - 9080:9080
+        restart: on-failure
+        command: dgraph alpha --my=alpha:7080 --zero=zero:5080 --telemetry
+            "sentry=false;"
+
+    ratel:
+        image: dgraph/ratel:latest
+        restart: on-failure
+        ports:
+            - "8000:8000"
+
+    database:
+        container_name: wikipediadata
+        image: postgres
+        # Create the necessary environment variables.
+        # env_file:
+        #     - .env/development/database
+        shm_size: 2gb
+        command:
+            - "postgres"
+            - "-c"
+            - "effective_cache_size=16GB"
+            - "-c"
+            - "shared_buffers=8GB"
+            - "-c"
+            - "work_mem=100MB"
+            - "-c"
+            - "max_wal_size=1GB"
+
+        networks:
+            - integration
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
 
 networks:
     integration:
