@@ -64,11 +64,13 @@ class PageText(Base):
     Columns
     -------
     title : String(200)
-        page's title
+        page's title & row's primary key
     headings : ARRAY(String(200))
         list of section headings
     sections : ARRAY(TEXT)
         list containing the text content under each heading
+    links : ARRAY(String(200))
+        list of page titles of pages linked to on this page
     """
 
     __tablename__ = "text"
@@ -135,6 +137,35 @@ class Page(Base):
     def title_insensitive(cls):  # pylint: disable=no-self-argument
         """case-insensitive title comparator"""
         return CaseInsensitiveComparator(cls.page_title)
+
+
+class PageTokenization(Base):
+    """ORM class for the first 512 tokens of a page's lead
+
+    Properties
+    ----------
+    __tablename__ : token
+
+    Columns
+    -------
+    page_id : Integer, ForeignKey(Page.page_id)
+        id of the page with the below tokenization
+    page_tokens : ARRAY(Integer)
+        list of the first 512 tokens of a page
+    """
+
+    __tablename__ = "token"
+    page_id = Column(Integer, ForeignKey(Page.page_id), primary_key=True)
+    page_tokens = Column(ARRAY(Integer))
+
+    page = relationship("Page", foreign_keys="PageTokenization.page_id")
+
+    def __repr__(self):
+        msg = "<PageTokenization: (\n\t"
+        msg += "page_id={},\n\t".format(self.page_id)
+        msg += "page_tokens[:10]='{}',\n\t".format(self.page_tokens[:10])
+        msg += ")>"
+        return msg
 
 
 class PageLink(Base):
@@ -291,4 +322,3 @@ if __name__ == "__main__":
     DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/complete_wikipedia"
     with get_engine(DATABASE_URI) as engine:
         Base.metadata.create_all(engine)
-        drop_recreate_all_tables_except_text(engine)

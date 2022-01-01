@@ -2,6 +2,7 @@ version: '3'
 
 # name for volume to store the data throughout the file.
 volumes:
+    # need this part to map postgres-data to the default volumes directory
     postgres-data: null
 services:
     zero:

@@ -10,7 +10,10 @@ Missing
 """
 import unittest
 
+from pydantic import ValidationError
+
 from wikitools.wikipage import WikipediaPage
+from database.models import PageText
 
 
 class WikipediaPageTest(unittest.TestCase):
@@ -32,16 +35,13 @@ class WikipediaPageTest(unittest.TestCase):
         headings = ["Lead", "Science", "Physics"]
         sections = ["Lead's content", "Science's content", "Physics's content"]
         links = ["Albert Einstein", "String Theory", "Physics Theories"]
-        test_page = WikipediaPage(title, headings, sections, links)
+        test_page = WikipediaPage(
+            title=title, headings=headings, sections=sections, links=links
+        )
         self.assertEqual(test_page.title, title)
         self.assertEqual(test_page.headings, headings)
         self.assertEqual(test_page.sections, sections)
         self.assertEqual(test_page.links, links)
-
-    #         title: str,
-    #         headings: List[str],
-    #         sections: List[str],
-    #         links: List[str],
 
     def test_constructor_invalid_params(self):
         # invalid arguments
@@ -54,51 +54,97 @@ class WikipediaPageTest(unittest.TestCase):
         string_list = ["list", "with", "only", "strings"]
         # cases
         # title
-        with self.assertRaisesRegex(TypeError, "invalid title"):
-            WikipediaPage(invalid_title, string_list, string_list, string_list)
+        with self.assertRaises(ValidationError):
+            WikipediaPage(
+                title=invalid_title,
+                headings=string_list,
+                sections=string_list,
+                links=string_list,
+            )
         # headings
-        with self.assertRaisesRegex(TypeError, "invalid headings"):
-            WikipediaPage(title, invalid_not_list, string_list, string_list)
-        with self.assertRaisesRegex(TypeError, "invalid headings element"):
-            WikipediaPage(title, invalid_not_string_list, string_list, string_list)
+        with self.assertRaises(ValidationError):
+            WikipediaPage(
+                title=title,
+                headings=invalid_not_list,
+                sections=string_list,
+                links=string_list,
+            )
         # sections
-        with self.assertRaisesRegex(TypeError, "invalid sections"):
-            WikipediaPage(title, string_list, invalid_not_list, string_list)
-        with self.assertRaisesRegex(TypeError, "invalid sections element"):
-            WikipediaPage(title, string_list, invalid_not_string_list, string_list)
+        with self.assertRaises(ValidationError):
+            WikipediaPage(
+                title=title,
+                headings=string_list,
+                sections=invalid_not_list,
+                links=string_list,
+            )
         # links
-        with self.assertRaisesRegex(TypeError, "invalid links"):
-            WikipediaPage(title, string_list, string_list, invalid_not_list)
-        with self.assertRaisesRegex(TypeError, "invalid links element"):
-            WikipediaPage(title, string_list, string_list, invalid_not_string_list)
+        with self.assertRaises(ValidationError):
+            WikipediaPage(
+                title=title,
+                headings=string_list,
+                sections=string_list,
+                links=invalid_not_list,
+            )
         # len(headings) != len(sections)
-        with self.assertRaisesRegex(
-            ValueError,
-            r"len\(headings\) \((.+)\) must equal len\(sections\) \((.+)\)(.+)",
-        ):
-            WikipediaPage(title, invalid_long_headings, string_list, string_list)
+        with self.assertRaises(ValidationError):
+            WikipediaPage(
+                title=title,
+                headings=invalid_long_headings,
+                sections=string_list,
+                links=string_list,
+            )
 
     def test_eq(self):
         title = "Quantum Mechanics"
         headings = ["Lead", "Physics", "Science"]
         sections = ["Lead's content", "Science's content", "Physics's content"]
         links = ["Albert Einstein", "String Theory", "Physics Theories"]
-        test_self = WikipediaPage(title, headings, sections, links)
+        test_self = WikipediaPage(
+            title=title, headings=headings, sections=sections, links=links
+        )
         # same parameters
-        test_other = WikipediaPage(title, headings, sections, links)
+        test_other = WikipediaPage(
+            title=title, headings=headings, sections=sections, links=links
+        )
         self.assertEqual(test_self, test_other)
         # different title
-        test_other = WikipediaPage("different title", headings, sections, links)
+        test_other = WikipediaPage(
+            title="different title", headings=headings, sections=sections, links=links
+        )
         self.assertNotEqual(test_self, test_other)
         # different headings
-        test_other = WikipediaPage(title, ["not", "the", "same"], sections, links)
+        test_other = WikipediaPage(
+            title=title, headings=["not", "the", "same"], sections=sections, links=links
+        )
         self.assertNotEqual(test_self, test_other)
         # different sections
-        test_other = WikipediaPage(title, headings, ["not", "the", "same"], links)
+        test_other = WikipediaPage(
+            title=title, headings=headings, sections=["not", "the", "same"], links=links
+        )
         self.assertNotEqual(test_self, test_other)
         # different links
-        test_other = WikipediaPage(title, headings, sections, ["not", "the", "same"])
+        test_other = WikipediaPage(
+            title=title,
+            headings=headings,
+            sections=sections,
+            links=["not", "the", "same"],
+        )
         self.assertNotEqual(test_self, test_other)
+
+    def test_pagetext(self):
+        title = "Quantum Mechanics"
+        headings = ["Lead", "Science", "Physics"]
+        sections = ["Lead's content", "Science's content", "Physics's content"]
+        links = ["Albert Einstein", "String Theory", "Physics Theories"]
+        test_page = WikipediaPage(
+            title=title, headings=headings, sections=sections, links=links
+        )
+        p = test_page.page()
+        self.assertIsInstance(p, PageText)
+        self.assertEqual(p.title, title)
+        self.assertEqual(p.headings, headings)
+        self.assertEqual(p.sections, sections)
+        self.assertEqual(p.links, links)
 
 
 if __name__ == "__main__":

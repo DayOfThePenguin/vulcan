@@ -3,105 +3,33 @@ about a Wikipedia page
 """
 from typing import List
 
-from database.models import Page
+from pydantic import BaseModel, validator
+
+from database.models import PageText
 
 
-class WikipediaPage(object):
+class WikipediaPage(BaseModel):
     """Represent a page in a Wikipedia database dump"""
 
-    def __init__(
-        self,
-        title: str,
-        headings: List[str],
-        sections: List[str],
-        links: List[str],
-    ) -> None:
-        # Type-checking
-        # title
-        if not isinstance(title, str):
-            msg = "WikipediaPage.title must be a string. invalid title: {}"
-            raise TypeError(msg.format(title))
-        # headings
-        if not isinstance(headings, list):
-            msg = "WikipediaPage.headings must be a list. invalid headings: {}"
-            raise TypeError(msg.format(headings))
-        for heading in headings:
-            if not isinstance(heading, str):
-                msg = "WikipediaPage.headings items must be strings. invalid headings element: {}"
-                raise TypeError(msg.format(heading))
-        # sections
-        if not isinstance(sections, list):
-            msg = "WikipediaPage.sections must be a list. invalid sections: {}"
-            raise TypeError(msg.format(sections))
-        for section in sections:
-            if not isinstance(section, str):
-                msg = "WikipediaPage.sections items must be strings. invalid sections element: {}"
-                raise TypeError(msg.format(section))
-        # links
-        if not isinstance(links, list):
-            msg = "WikipediaPage.links must be a list. invalid links: {}"
-            raise TypeError(msg.format(links))
-        for link in links:
-            if not isinstance(link, str):
-                msg = "WikipediaPage.links items must be strings. invalid links element: {}"
-                raise TypeError(msg.format(link))
-        # every heading must have a section
-        if len(sections) != len(headings):
-            msg = "len(headings) ({}) must equal len(sections) ({}). "
-            # msg += "every heading must have a section"
-            msg = msg.format(sections, headings)
-            raise ValueError(msg)
-        # variables
-        self.title = title
-        self.headings = headings
-        self.sections = sections
-        self.links = links
+    title: str
+    headings: List[str]
+    sections: List[str]
+    links: List[str]
 
-    def __eq__(self, other):
-        """Equality method
-
-        Parameters
-        ----------
-        other : WikipediaPage
-            other object to compare to
-
-        Returns
-        -------
-        True
-            if title, headings, sections, and links are equal
-        False
-            else
-        """
-        if self.title != other.title:
-            return False
-        elif self.headings != other.headings:
-            return False
-        elif self.sections != other.sections:
-            return False
-        elif self.headings != other.headings:
-            return False
-        elif self.links != other.links:
-            return False
-        else:
-            return True
-
-    def __repr__(self):
-        msg = "<Page: (\n\t"
-        msg += "title='{}',\n\t".format(self.title)
-        msg += "headings[:10]={},\n\t".format(self.headings[:10])
-        msg += "sections[0]={},\n\t".format(self.sections)
-        msg += "links[:10]={}\n".format(self.links[:10])
-        msg += ")>"
-        return msg
+    @validator("sections")
+    def headings_sections_same_length(cls, v, values):
+        if "headings" in values and len(v) != len(values["headings"]):
+            raise ValueError("headings must be the same length as sections")
+        return v
 
     def page(self):
         """Make sqlalchemy representation of self
         Returns
         -------
-        page : models.Page
-            self represented as a Page from models.py to add to a database
+        page : database.models.PageText
+            self represented as a PageText from database.models to add to a database
         """
-        page = Page(
+        page = PageText(
             title=self.title,
             headings=self.headings,
             sections=self.sections,

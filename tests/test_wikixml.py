@@ -201,7 +201,9 @@ class IntegrationTest(unittest.TestCase):
         #     print(link)
         # print(links)
         headings, sections = wikixml.get_headings_sections(element)
-        page = WikipediaPage(title, headings, sections, links)
+        page = WikipediaPage(
+            title=title, headings=headings, sections=sections, links=links
+        )
         print(page)
 
 
