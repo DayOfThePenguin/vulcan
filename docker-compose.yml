@@ -5,6 +5,16 @@ volumes:
     # need this part to map postgres-data to the default volumes directory
     postgres-data: null
 services:
+    database_builder:
+        build:
+            context: ./database_builder
+            target: debug
+        restart: on-failure
+        volumes:
+            - ./database_builder:/code
+        networks:
+            - integration
+
     zero:
         image: dgraph/dgraph:latest
         volumes:
@@ -39,9 +49,6 @@ services:
     database:
         container_name: wikipediadata
         image: postgres
-        # Create the necessary environment variables.
-        # env_file:
-        #     - .env/development/database
         shm_size: 2gb
         command:
             - "postgres"
@@ -113,10 +120,3 @@ networks:
     integration:
         external:
             name: integration-net
-
-# Postgres Config:
-# select name, setting from pg_settings where name = 'shared_buffers';
-# ALTER SYSTEM SET effective_cache_size='16GB';
-# ALTER SYSTEM SET shared_buffers='8GB';
-# ALTER SYSTEM SET work_mem='100MB';
-# ALTER SYSTEM SET max_wal_size='1GB';

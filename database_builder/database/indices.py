@@ -150,7 +150,4 @@ if __name__ == "__main__":
     DATABASE_URI = "postgresql://postgres:postgres@localhost:5432/complete_wikipedia"
 
     with get_engine(DATABASE_URI) as engine:
-        # drop_indices(engine)
-        create_page_indices(engine)
-        create_page_quality_indices(engine)
-        create_page_talk_indices(engine)
+        create_indices(engine)
