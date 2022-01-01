@@ -13,7 +13,6 @@
     "python.testing.nosetestsEnabled": false,
     "python.testing.unittestEnabled": true,
     "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
     "python.linting.banditEnabled": true,
     "python.linting.pylintArgs": [
         "--disable=import-error"
