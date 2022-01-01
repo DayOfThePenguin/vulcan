@@ -27,6 +27,12 @@ This module supports python 3.8+
 [env] > 
 ```
 
+### Clone the MediaWiki repo into this directory
+Follow setup instructions in [Developers.md](https://gerrit.wikimedia.org/g/mediawiki/core/+/HEAD/DEVELOPERS.md)
+- Put the .env file in this directory instead of the mediawiki directory
+- This repo's docker-compose file is already set up to use a mediawiki in ~/mediawiki
+  - No additional configuration here required, ports are deconflicted between dgraph, postgres, and mediawiki
+
 ### Use pip to install wikimap's dependencies
 ```shell
 [env] > pip install -r requirements.txt
