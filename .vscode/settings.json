@@ -2,20 +2,15 @@
     "python.pythonPath": "env/bin/python",
     "python.envFile": "${workspaceFolder}/.vscode/.env",
     "editor.formatOnSave": true,
-    "python.testing.unittestArgs": [
-        "-v",
-        "-s",
-        "./tests",
-        "-p",
-        "test_*.py"
-    ],
-    "python.testing.pytestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
-    "python.testing.unittestEnabled": true,
     "python.linting.enabled": true,
     "python.linting.banditEnabled": true,
     "python.linting.pylintArgs": [
         "--disable=import-error"
         // pylint doesn't get the PYTHONPATH so local modules throw this error
-    ]
+    ],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
